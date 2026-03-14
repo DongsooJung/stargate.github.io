@@ -3,433 +3,682 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TMAP 위치 정보 수집기</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>위치 정보 수집기 - Stargate</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0d1117;
-            color: #e2e8f0;
+        :root {
+            --color-bg-primary: #0f172a;
+            --color-bg-secondary: #1e293b;
+            --color-bg-card: #334155;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #38bdf8;
+            --color-accent-hover: #0ea5e9;
+            --color-gradient-start: #6366f1;
+            --color-gradient-end: #8b5cf6;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover { color: var(--color-accent); }
+
+        main {
+            margin-top: 70px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-desc {
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
         #map {
             width: 100%;
-            height: 500px;
-            border-radius: 0.75rem;
+            height: 450px;
+            border-radius: 16px;
             overflow: hidden;
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            margin-bottom: 1.5rem;
         }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+        }
+
+        .btn-green { background: linear-gradient(135deg, #059669, #10b981); }
+        .btn-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+        .btn-red { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .btn-amber { background: linear-gradient(135deg, #d97706, #f59e0b); }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--color-bg-secondary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        .info-card .label {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-card .value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        .panel {
+            background: var(--color-bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .location-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
         .location-item {
-            transition: all 0.3s ease;
+            background: var(--color-bg-card);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
         }
+
         .location-item:hover {
-            background-color: #1f2937;
+            border-color: var(--color-accent);
             transform: translateX(4px);
+        }
+
+        .location-item .loc-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .location-item .loc-info p {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-secondary);
+        }
+
+        .status-bar {
+            background: var(--color-bg-card);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+        .status-dot.active { background: #22c55e; }
+
+        .tracking-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .tracking-badge.inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        footer {
+            background: var(--color-bg-secondary);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            margin-top: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .page-title { font-size: 1.75rem; }
+            #map { height: 300px; }
+            .controls { grid-template-columns: 1fr 1fr; }
+            .nav-links { display: none; }
         }
     </style>
 </head>
-<body class="antialiased">
-    <!-- 내비게이션 바 -->
-    <nav class="bg-gray-900 bg-opacity-90 shadow-lg">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold text-teal-400 hover:text-teal-300 transition duration-300">
-                STARGATE
-            </a>
-            <div class="flex space-x-4">
-                <a href="index.html" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300">홈으로</a>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">⭐ STARGATE</a>
+            <ul class="nav-links">
+                <li><a href="index.html">홈</a></li>
+                <li><a href="location-tracker.html" style="color: var(--color-accent);">위치 수집</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main style="margin-top: 90px;">
+        <h1 class="page-title">📍 위치 정보 수집기</h1>
+        <p class="page-desc">실시간으로 위치를 추적하고, 수집한 데이터를 관리하세요. (OpenStreetMap 기반 - API 키 불필요)</p>
+
+        <!-- 상태 바 -->
+        <div class="status-bar">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">지도 로딩 중...</span>
+            <span class="tracking-badge inactive" id="trackingBadge">추적 중지</span>
+        </div>
+
+        <!-- 지도 -->
+        <div id="map"></div>
+
+        <!-- 컨트롤 버튼 -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="getCurrentLocation()">📍 현재 위치</button>
+            <button class="btn btn-green" onclick="saveCurrentLocation()">💾 위치 저장</button>
+            <button class="btn btn-amber" onclick="toggleTracking()" id="trackBtn">🔄 자동 추적 시작</button>
+            <button class="btn btn-purple" onclick="exportLocations()">📤 데이터 내보내기</button>
+            <button class="btn btn-red" onclick="clearLocations()">🗑️ 전체 삭제</button>
+        </div>
+
+        <!-- 현재 위치 정보 -->
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="label">위도 (Latitude)</div>
+                <div class="value" id="currentLat">-</div>
+            </div>
+            <div class="info-card">
+                <div class="label">경도 (Longitude)</div>
+                <div class="value" id="currentLng">-</div>
+            </div>
+            <div class="info-card">
+                <div class="label">정확도 (Accuracy)</div>
+                <div class="value" id="currentAccuracy">-</div>
+            </div>
+            <div class="info-card">
+                <div class="label">마지막 업데이트</div>
+                <div class="value" id="lastUpdate" style="font-size: 1rem;">-</div>
             </div>
         </div>
-    </nav>
 
-    <!-- 메인 컨텐츠 -->
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-gray-900 rounded-xl shadow-2xl p-8 mb-6">
-                <h1 class="text-4xl font-bold text-teal-400 mb-4">TMAP 위치 정보 수집기</h1>
-                <p class="text-gray-300 mb-6">실시간으로 위치 정보를 수집하고 관리할 수 있습니다.</p>
-
-                <!-- API 키 입력 섹션 -->
-                <div class="mb-6 bg-gray-800 p-6 rounded-lg">
-                    <label for="apiKey" class="block text-gray-300 text-sm font-bold mb-2">
-                        TMAP API 키 입력 (필수)
-                    </label>
-                    <div class="flex gap-3">
-                        <input
-                            type="text"
-                            id="apiKey"
-                            class="flex-1 shadow appearance-none border rounded-lg py-3 px-4 text-gray-900 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-200"
-                            placeholder="TMAP API 키를 입력하세요"
-                        >
-                        <button
-                            onclick="initMap()"
-                            class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300">
-                            지도 로드
-                        </button>
-                    </div>
-                    <p class="text-gray-400 text-sm mt-2">
-                        TMAP API 키는 <a href="https://tmapapi.sktelecom.com/" target="_blank" class="text-teal-400 hover:text-teal-300">TMAP API 포털</a>에서 발급받을 수 있습니다.
-                    </p>
-                </div>
-
-                <!-- 지도 컨테이너 -->
-                <div id="map" class="mb-6 bg-gray-800 flex items-center justify-center">
-                    <p class="text-gray-400">API 키를 입력하고 '지도 로드' 버튼을 클릭하세요</p>
-                </div>
-
-                <!-- 컨트롤 버튼들 -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <button
-                        onclick="getCurrentLocation()"
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform hover:scale-105 transition duration-300">
-                        현재 위치
-                    </button>
-                    <button
-                        onclick="saveCurrentLocation()"
-                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform hover:scale-105 transition duration-300">
-                        위치 저장
-                    </button>
-                    <button
-                        onclick="exportLocations()"
-                        class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform hover:scale-105 transition duration-300">
-                        데이터 내보내기
-                    </button>
-                    <button
-                        onclick="clearLocations()"
-                        class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform hover:scale-105 transition duration-300">
-                        데이터 초기화
-                    </button>
-                </div>
-
-                <!-- 현재 위치 정보 -->
-                <div class="bg-gray-800 p-6 rounded-lg mb-6">
-                    <h3 class="text-xl font-bold text-teal-400 mb-4">현재 위치 정보</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-gray-400 text-sm">위도 (Latitude)</p>
-                            <p id="currentLat" class="text-white text-lg font-semibold">-</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">경도 (Longitude)</p>
-                            <p id="currentLng" class="text-white text-lg font-semibold">-</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">정확도 (Accuracy)</p>
-                            <p id="currentAccuracy" class="text-white text-lg font-semibold">-</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">마지막 업데이트</p>
-                            <p id="lastUpdate" class="text-white text-lg font-semibold">-</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 저장된 위치 목록 -->
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-teal-400 mb-4">저장된 위치 목록 (<span id="locationCount">0</span>개)</h3>
-                    <div id="locationList" class="space-y-2 max-h-96 overflow-y-auto">
-                        <p class="text-gray-400 text-center py-4">저장된 위치가 없습니다.</p>
-                    </div>
-                </div>
+        <!-- 저장된 위치 목록 -->
+        <div class="panel">
+            <div class="panel-title">
+                📋 저장된 위치 목록 (<span id="locationCount">0</span>개)
+            </div>
+            <div class="location-list" id="locationList">
+                <div class="empty-state">저장된 위치가 없습니다. '위치 저장' 버튼을 눌러 시작하세요.</div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- TMAP API 스크립트는 동적으로 로드됩니다 -->
+    <footer>
+        <p>&copy; 2026 Stargate. All rights reserved.</p>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // ===== 전역 변수 =====
         let map = null;
         let marker = null;
+        let trackingWatchId = null;
         let savedLocations = [];
-        let isMapLoaded = false;
+        let locationMarkers = [];
+        let currentLat = null;
+        let currentLng = null;
 
-        // 로컬 스토리지에서 저장된 위치 불러오기
-        function loadSavedLocations() {
-            const saved = localStorage.getItem('savedLocations');
-            if (saved) {
-                savedLocations = JSON.parse(saved);
-                updateLocationList();
-            }
+        // ===== 초기화 =====
+        function init() {
+            loadSavedLocations();
+            initMap();
         }
 
-        // TMAP API 스크립트 로드 및 지도 초기화
         function initMap() {
-            const apiKey = document.getElementById('apiKey').value.trim();
+            // 서울 시청 기본 좌표
+            const defaultLat = 37.5665;
+            const defaultLng = 126.9780;
 
-            if (!apiKey) {
-                alert('TMAP API 키를 입력해주세요.');
-                return;
-            }
+            map = L.map('map').setView([defaultLat, defaultLng], 15);
 
-            // TMAP API 스크립트가 이미 로드되었는지 확인
-            if (!isMapLoaded) {
-                const script = document.createElement('script');
-                script.src = `https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=${apiKey}`;
-                script.onload = function() {
-                    createMap();
-                    isMapLoaded = true;
-                };
-                script.onerror = function() {
-                    alert('TMAP API 로드에 실패했습니다. API 키를 확인해주세요.');
-                };
-                document.head.appendChild(script);
-            } else {
-                createMap();
-            }
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // 지도 클릭 이벤트
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                setMarker(lat, lng);
+                updateCurrentLocation(lat, lng, '클릭 선택');
+            });
+
+            setStatus(true, '지도 로드 완료');
+
+            // 저장된 위치 마커 표시
+            renderSavedMarkers();
+
+            // 자동으로 현재 위치 가져오기
+            getCurrentLocation();
         }
 
-        // 지도 생성
-        function createMap() {
-            const mapDiv = document.getElementById('map');
-            mapDiv.innerHTML = '';
-
-            try {
-                map = new Tmapv2.Map('map', {
-                    center: new Tmapv2.LatLng(37.5665, 126.9780), // 서울 시청 기본 위치
-                    width: '100%',
-                    height: '500px',
-                    zoom: 15
-                });
-
-                // 지도 클릭 이벤트
-                map.addListener('click', function(evt) {
-                    const latLng = evt.latLng;
-                    updateCurrentLocation(latLng.lat(), latLng.lng(), 'N/A');
-
-                    if (marker) {
-                        marker.setMap(null);
-                    }
-
-                    marker = new Tmapv2.Marker({
-                        position: latLng,
-                        map: map,
-                        title: '선택한 위치'
-                    });
-                });
-
-                alert('지도가 성공적으로 로드되었습니다!');
-
-                // 자동으로 현재 위치 가져오기
-                getCurrentLocation();
-            } catch (error) {
-                alert('지도 생성 중 오류가 발생했습니다: ' + error.message);
+        // ===== 지도 마커 =====
+        function setMarker(lat, lng) {
+            if (marker) {
+                map.removeLayer(marker);
             }
+            marker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: '',
+                    html: '<div style="width:24px;height:24px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            }).addTo(map).bindPopup(`위도: ${lat.toFixed(6)}<br>경도: ${lng.toFixed(6)}`);
         }
 
-        // 현재 위치 가져오기 (Geolocation API 사용)
+        function renderSavedMarkers() {
+            // 기존 마커 제거
+            locationMarkers.forEach(m => map.removeLayer(m));
+            locationMarkers = [];
+
+            savedLocations.forEach((loc, idx) => {
+                const m = L.circleMarker([loc.latitude, loc.longitude], {
+                    radius: 6,
+                    fillColor: '#38bdf8',
+                    fillOpacity: 0.8,
+                    color: '#fff',
+                    weight: 2
+                }).addTo(map).bindPopup(`위치 #${savedLocations.length - idx}<br>${loc.displayTime}`);
+                locationMarkers.push(m);
+            });
+        }
+
+        // ===== 위치 추적 =====
         function getCurrentLocation() {
-            if (!map) {
-                alert('먼저 지도를 로드해주세요.');
+            if (!navigator.geolocation) {
+                alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
                 return;
             }
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        const accuracy = position.coords.accuracy;
+            setStatus(false, '위치 감지 중...');
 
-                        updateCurrentLocation(lat, lng, accuracy + 'm');
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const acc = pos.coords.accuracy;
 
-                        // 지도 중심 이동
-                        const latLng = new Tmapv2.LatLng(lat, lng);
-                        map.setCenter(latLng);
-
-                        // 마커 업데이트
-                        if (marker) {
-                            marker.setMap(null);
-                        }
-
-                        marker = new Tmapv2.Marker({
-                            position: latLng,
-                            map: map,
-                            title: '현재 위치',
-                            icon: 'http://tmapapi.sktelecom.com/upload/tmap/marker/pin_r_m_s.png'
-                        });
-                    },
-                    function(error) {
-                        alert('위치 정보를 가져올 수 없습니다: ' + error.message);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    }
-                );
-            } else {
-                alert('이 브라우저는 Geolocation을 지원하지 않습니다.');
-            }
+                    map.setView([lat, lng], 16);
+                    setMarker(lat, lng);
+                    updateCurrentLocation(lat, lng, acc.toFixed(1) + 'm');
+                    setStatus(true, '위치 감지 성공');
+                },
+                function(err) {
+                    setStatus(false, '위치 감지 실패: ' + err.message);
+                    // 실패 시 시뮬레이션 데이터 사용
+                    const simLat = 37.5665 + (Math.random() - 0.5) * 0.01;
+                    const simLng = 126.9780 + (Math.random() - 0.5) * 0.01;
+                    map.setView([simLat, simLng], 16);
+                    setMarker(simLat, simLng);
+                    updateCurrentLocation(simLat, simLng, '시뮬레이션');
+                    setStatus(true, '시뮬레이션 모드 (실제 위치 사용 불가)');
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
         }
 
-        // 현재 위치 정보 업데이트
-        function updateCurrentLocation(lat, lng, accuracy) {
-            document.getElementById('currentLat').textContent = lat.toFixed(6);
-            document.getElementById('currentLng').textContent = lng.toFixed(6);
-            document.getElementById('currentAccuracy').textContent = accuracy;
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR');
-        }
+        function toggleTracking() {
+            const btn = document.getElementById('trackBtn');
+            const badge = document.getElementById('trackingBadge');
 
-        // 현재 위치 저장
-        function saveCurrentLocation() {
-            const lat = document.getElementById('currentLat').textContent;
-            const lng = document.getElementById('currentLng').textContent;
-            const accuracy = document.getElementById('currentAccuracy').textContent;
-
-            if (lat === '-' || lng === '-') {
-                alert('먼저 위치 정보를 가져와주세요.');
+            if (trackingWatchId !== null) {
+                navigator.geolocation.clearWatch(trackingWatchId);
+                trackingWatchId = null;
+                btn.textContent = '🔄 자동 추적 시작';
+                badge.textContent = '추적 중지';
+                badge.classList.add('inactive');
+                setStatus(true, '자동 추적 중지됨');
                 return;
+            }
+
+            if (!navigator.geolocation) {
+                alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+                return;
+            }
+
+            trackingWatchId = navigator.geolocation.watchPosition(
+                function(pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const acc = pos.coords.accuracy;
+
+                    map.setView([lat, lng], 16);
+                    setMarker(lat, lng);
+                    updateCurrentLocation(lat, lng, acc.toFixed(1) + 'm');
+
+                    // 자동 저장
+                    autoSaveLocation(lat, lng, acc.toFixed(1) + 'm');
+                },
+                function(err) {
+                    setStatus(false, '추적 오류: ' + err.message);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+            );
+
+            btn.textContent = '⏹️ 자동 추적 중지';
+            badge.textContent = '추적 중';
+            badge.classList.remove('inactive');
+            setStatus(true, '자동 추적 시작됨');
+        }
+
+        function autoSaveLocation(lat, lng, accuracy) {
+            if (savedLocations.length > 0) {
+                const last = savedLocations[0];
+                const dist = getDistance(lat, lng, last.latitude, last.longitude);
+                if (dist < 10) return;
             }
 
             const location = {
                 id: Date.now(),
-                latitude: parseFloat(lat),
-                longitude: parseFloat(lng),
+                latitude: lat,
+                longitude: lng,
                 accuracy: accuracy,
                 timestamp: new Date().toISOString(),
                 displayTime: new Date().toLocaleString('ko-KR')
             };
 
             savedLocations.unshift(location);
-            localStorage.setItem('savedLocations', JSON.stringify(savedLocations));
+            persistLocations();
             updateLocationList();
-
-            alert('위치가 저장되었습니다!');
+            renderSavedMarkers();
         }
 
-        // 위치 목록 업데이트
-        function updateLocationList() {
-            const listDiv = document.getElementById('locationList');
-            const countSpan = document.getElementById('locationCount');
+        function getDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
 
-            countSpan.textContent = savedLocations.length;
+        // ===== UI 업데이트 =====
+        function updateCurrentLocation(lat, lng, accuracy) {
+            currentLat = lat;
+            currentLng = lng;
+            document.getElementById('currentLat').textContent = lat.toFixed(6);
+            document.getElementById('currentLng').textContent = lng.toFixed(6);
+            document.getElementById('currentAccuracy').textContent = accuracy;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR');
+        }
 
-            if (savedLocations.length === 0) {
-                listDiv.innerHTML = '<p class="text-gray-400 text-center py-4">저장된 위치가 없습니다.</p>';
+        function setStatus(ok, msg) {
+            document.getElementById('statusDot').className = 'status-dot' + (ok ? ' active' : '');
+            document.getElementById('statusText').textContent = msg;
+        }
+
+        // ===== 위치 저장/관리 =====
+        function saveCurrentLocation() {
+            if (currentLat === null || currentLng === null) {
+                alert('먼저 위치를 감지하거나 지도를 클릭하세요.');
                 return;
             }
 
-            listDiv.innerHTML = savedLocations.map((loc, index) => `
-                <div class="location-item bg-gray-700 p-4 rounded-lg cursor-pointer" onclick="showLocationOnMap(${index})">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <p class="text-white font-semibold mb-1">위치 #${savedLocations.length - index}</p>
-                            <p class="text-gray-300 text-sm">위도: ${loc.latitude.toFixed(6)}, 경도: ${loc.longitude.toFixed(6)}</p>
-                            <p class="text-gray-400 text-xs mt-1">정확도: ${loc.accuracy} | ${loc.displayTime}</p>
-                        </div>
-                        <button
-                            onclick="event.stopPropagation(); deleteLocation(${loc.id})"
-                            class="text-red-400 hover:text-red-300 ml-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6h18"></path>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+            const location = {
+                id: Date.now(),
+                latitude: currentLat,
+                longitude: currentLng,
+                accuracy: document.getElementById('currentAccuracy').textContent,
+                timestamp: new Date().toISOString(),
+                displayTime: new Date().toLocaleString('ko-KR')
+            };
+
+            savedLocations.unshift(location);
+            persistLocations();
+            updateLocationList();
+            renderSavedMarkers();
+            setStatus(true, '위치 저장 완료!');
         }
 
-        // 지도에서 저장된 위치 보기
-        function showLocationOnMap(index) {
-            if (!map) {
-                alert('먼저 지도를 로드해주세요.');
-                return;
-            }
+        function deleteLocation(id) {
+            savedLocations = savedLocations.filter(loc => loc.id !== id);
+            persistLocations();
+            updateLocationList();
+            renderSavedMarkers();
+        }
 
+        function clearLocations() {
+            if (savedLocations.length === 0) return;
+            if (!confirm('모든 저장된 위치를 삭제하시겠습니까?')) return;
+
+            savedLocations = [];
+            persistLocations();
+            updateLocationList();
+            renderSavedMarkers();
+            setStatus(true, '데이터 초기화 완료');
+        }
+
+        function showOnMap(index) {
             const loc = savedLocations[index];
-            const latLng = new Tmapv2.LatLng(loc.latitude, loc.longitude);
-
-            map.setCenter(latLng);
-            map.setZoom(17);
-
-            if (marker) {
-                marker.setMap(null);
-            }
-
-            marker = new Tmapv2.Marker({
-                position: latLng,
-                map: map,
-                title: `저장된 위치 #${savedLocations.length - index}`
-            });
-
+            map.setView([loc.latitude, loc.longitude], 17);
+            setMarker(loc.latitude, loc.longitude);
             updateCurrentLocation(loc.latitude, loc.longitude, loc.accuracy);
         }
 
-        // 위치 삭제
-        function deleteLocation(id) {
-            if (confirm('이 위치를 삭제하시겠습니까?')) {
-                savedLocations = savedLocations.filter(loc => loc.id !== id);
-                localStorage.setItem('savedLocations', JSON.stringify(savedLocations));
+        // ===== 데이터 관리 =====
+        function persistLocations() {
+            localStorage.setItem('stargate_locations', JSON.stringify(savedLocations));
+        }
+
+        function loadSavedLocations() {
+            const data = localStorage.getItem('stargate_locations');
+            if (data) {
+                savedLocations = JSON.parse(data);
                 updateLocationList();
             }
         }
 
-        // 데이터 내보내기 (JSON, CSV)
+        function updateLocationList() {
+            const container = document.getElementById('locationList');
+            const countEl = document.getElementById('locationCount');
+            countEl.textContent = savedLocations.length;
+
+            if (savedLocations.length === 0) {
+                container.innerHTML = '<div class="empty-state">저장된 위치가 없습니다. \'위치 저장\' 버튼을 눌러 시작하세요.</div>';
+                return;
+            }
+
+            container.innerHTML = savedLocations.map((loc, i) => `
+                <div class="location-item" onclick="showOnMap(${i})">
+                    <div class="loc-info">
+                        <h4>📌 위치 #${savedLocations.length - i}</h4>
+                        <p>위도: ${loc.latitude.toFixed(6)}, 경도: ${loc.longitude.toFixed(6)}</p>
+                        <p>정확도: ${loc.accuracy} | ${loc.displayTime}</p>
+                    </div>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteLocation(${loc.id})" title="삭제">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // ===== 내보내기 =====
         function exportLocations() {
             if (savedLocations.length === 0) {
                 alert('내보낼 데이터가 없습니다.');
                 return;
             }
 
-            const format = prompt('내보낼 형식을 선택하세요 (json 또는 csv):', 'json');
+            const format = prompt('내보낼 형식을 선택하세요:\n1) json\n2) csv', 'json');
 
-            if (format === 'json') {
-                exportAsJSON();
-            } else if (format === 'csv') {
-                exportAsCSV();
-            } else {
-                alert('올바른 형식을 입력해주세요 (json 또는 csv)');
+            if (format === 'json' || format === '1') {
+                const blob = new Blob([JSON.stringify(savedLocations, null, 2)], { type: 'application/json' });
+                download(blob, 'locations_' + Date.now() + '.json');
+            } else if (format === 'csv' || format === '2') {
+                let csv = 'ID,위도,경도,정확도,타임스탬프\n';
+                savedLocations.forEach(loc => {
+                    csv += `${loc.id},${loc.latitude},${loc.longitude},${loc.accuracy},${loc.timestamp}\n`;
+                });
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                download(blob, 'locations_' + Date.now() + '.csv');
             }
         }
 
-        // JSON 형식으로 내보내기
-        function exportAsJSON() {
-            const dataStr = JSON.stringify(savedLocations, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            downloadFile(blob, 'locations_' + Date.now() + '.json');
+        function download(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            setStatus(true, '파일 다운로드 완료!');
         }
 
-        // CSV 형식으로 내보내기
-        function exportAsCSV() {
-            let csv = 'ID,위도,경도,정확도,타임스탬프\n';
-            savedLocations.forEach(loc => {
-                csv += `${loc.id},${loc.latitude},${loc.longitude},${loc.accuracy},${loc.timestamp}\n`;
-            });
-
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-            downloadFile(blob, 'locations_' + Date.now() + '.csv');
-        }
-
-        // 파일 다운로드
-        function downloadFile(blob, filename) {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(link.href);
-            alert('데이터가 다운로드되었습니다!');
-        }
-
-        // 데이터 초기화
-        function clearLocations() {
-            if (confirm('모든 저장된 위치를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-                savedLocations = [];
-                localStorage.removeItem('savedLocations');
-                updateLocationList();
-                alert('모든 데이터가 삭제되었습니다.');
-            }
-        }
-
-        // 페이지 로드 시 저장된 위치 불러오기
-        window.onload = function() {
-            loadSavedLocations();
-        };
+        // ===== 시작 =====
+        window.addEventListener('DOMContentLoaded', init);
     </script>
-
-    <!-- 푸터 -->
-    <footer class="bg-gray-900 py-8 text-gray-400 text-center mt-12">
-        <div class="container mx-auto px-6">
-            <p>&copy; 2025 STARGATE 프로젝트. 모든 권리 보유.</p>
-        </div>
-    </footer>
 </body>
 </html>
