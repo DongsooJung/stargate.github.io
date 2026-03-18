@@ -378,11 +378,19 @@
         }
 
         function initMap() {
-            // 서울 시청 기본 좌표
-            const defaultLat = 37.5665;
-            const defaultLng = 126.9780;
+            // Leaflet 라이브러리 로딩 확인
+            if (typeof L === 'undefined') {
+                setStatus(false, 'Leaflet 라이브러리를 로드하는 중...');
+                setTimeout(initMap, 500);
+                return;
+            }
 
-            map = L.map('map').setView([defaultLat, defaultLng], 15);
+            try {
+                // 서울 시청 기본 좌표
+                const defaultLat = 37.5665;
+                const defaultLng = 126.9780;
+
+                map = L.map('map').setView([defaultLat, defaultLng], 15);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors',
@@ -404,38 +412,55 @@
 
             // 자동으로 현재 위치 가져오기
             getCurrentLocation();
+            } catch (error) {
+                console.error('지도 초기화 오류:', error);
+                setStatus(false, '지도 로드 실패: ' + error.message);
+                document.getElementById('map').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ef4444;"><p>⚠️ 지도를 로드할 수 없습니다. 페이지를 새로고침해주세요.</p></div>';
+            }
         }
 
         // ===== 지도 마커 =====
         function setMarker(lat, lng) {
-            if (marker) {
-                map.removeLayer(marker);
+            if (!map) return;
+
+            try {
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: '',
+                        html: '<div style="width:24px;height:24px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    })
+                }).addTo(map).bindPopup(`위도: ${lat.toFixed(6)}<br>경도: ${lng.toFixed(6)}`);
+            } catch (error) {
+                console.error('마커 설정 오류:', error);
             }
-            marker = L.marker([lat, lng], {
-                icon: L.divIcon({
-                    className: '',
-                    html: '<div style="width:24px;height:24px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                })
-            }).addTo(map).bindPopup(`위도: ${lat.toFixed(6)}<br>경도: ${lng.toFixed(6)}`);
         }
 
         function renderSavedMarkers() {
-            // 기존 마커 제거
-            locationMarkers.forEach(m => map.removeLayer(m));
-            locationMarkers = [];
+            if (!map) return;
 
-            savedLocations.forEach((loc, idx) => {
-                const m = L.circleMarker([loc.latitude, loc.longitude], {
-                    radius: 6,
-                    fillColor: '#38bdf8',
-                    fillOpacity: 0.8,
-                    color: '#fff',
-                    weight: 2
-                }).addTo(map).bindPopup(`위치 #${savedLocations.length - idx}<br>${loc.displayTime}`);
-                locationMarkers.push(m);
-            });
+            try {
+                // 기존 마커 제거
+                locationMarkers.forEach(m => map.removeLayer(m));
+                locationMarkers = [];
+
+                savedLocations.forEach((loc, idx) => {
+                    const m = L.circleMarker([loc.latitude, loc.longitude], {
+                        radius: 6,
+                        fillColor: '#38bdf8',
+                        fillOpacity: 0.8,
+                        color: '#fff',
+                        weight: 2
+                    }).addTo(map).bindPopup(`위치 #${savedLocations.length - idx}<br>${loc.displayTime}`);
+                    locationMarkers.push(m);
+                });
+            } catch (error) {
+                console.error('마커 렌더링 오류:', error);
+            }
         }
 
         // ===== 위치 추적 =====
@@ -605,10 +630,20 @@
         }
 
         function showOnMap(index) {
-            const loc = savedLocations[index];
-            map.setView([loc.latitude, loc.longitude], 17);
-            setMarker(loc.latitude, loc.longitude);
-            updateCurrentLocation(loc.latitude, loc.longitude, loc.accuracy);
+            if (!map) {
+                alert('지도가 아직 로드되지 않았습니다.');
+                return;
+            }
+
+            try {
+                const loc = savedLocations[index];
+                map.setView([loc.latitude, loc.longitude], 17);
+                setMarker(loc.latitude, loc.longitude);
+                updateCurrentLocation(loc.latitude, loc.longitude, loc.accuracy);
+            } catch (error) {
+                console.error('위치 표시 오류:', error);
+                alert('위치를 표시하는 중 오류가 발생했습니다.');
+            }
         }
 
         // ===== 데이터 관리 =====
@@ -617,10 +652,16 @@
         }
 
         function loadSavedLocations() {
-            const data = localStorage.getItem('stargate_locations');
-            if (data) {
-                savedLocations = JSON.parse(data);
-                updateLocationList();
+            try {
+                const data = localStorage.getItem('stargate_locations');
+                if (data) {
+                    savedLocations = JSON.parse(data);
+                    updateLocationList();
+                }
+            } catch (error) {
+                console.error('저장된 위치 로드 오류:', error);
+                savedLocations = [];
+                localStorage.removeItem('stargate_locations');
             }
         }
 
