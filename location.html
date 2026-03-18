@@ -50,6 +50,23 @@
             opacity: 0.9;
         }
 
+        .header .home-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .header .home-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
         .content {
             padding: 30px;
         }
@@ -242,6 +259,7 @@
         <div class="header">
             <h1>🗺️ NAVER MAP 위치 정보 수집</h1>
             <p>브라우저의 Geolocation API와 NAVER Map API를 활용한 실시간 위치 추적</p>
+            <a href="index.html" class="home-link">← STARGATE 홈으로 돌아가기</a>
         </div>
 
         <div class="content">
@@ -307,6 +325,7 @@
     <script>
         let map;
         let marker;
+        let accuracyCircle = null; // 정확도 원 객체 저장
         let watchId = null;
         let currentPosition = null;
         let locationHistory = [];
@@ -378,8 +397,11 @@
                 });
             }
 
-            // 정확도 원 표시
-            const circle = new naver.maps.Circle({
+            // 정확도 원 표시 (이전 원이 있으면 제거)
+            if (accuracyCircle) {
+                accuracyCircle.setMap(null);
+            }
+            accuracyCircle = new naver.maps.Circle({
                 map: map,
                 center: location,
                 radius: accuracy,
@@ -418,10 +440,18 @@
         function updateLocationInfo(position) {
             document.getElementById('latitude').textContent = position.coords.latitude.toFixed(6);
             document.getElementById('longitude').textContent = position.coords.longitude.toFixed(6);
-            document.getElementById('accuracy').textContent = position.coords.accuracy ? `${position.coords.accuracy.toFixed(2)} m` : '정보 없음';
-            document.getElementById('altitude').textContent = position.coords.altitude ? `${position.coords.altitude.toFixed(2)} m` : '정보 없음';
-            document.getElementById('speed').textContent = position.coords.speed ? `${(position.coords.speed * 3.6).toFixed(2)} km/h` : '정보 없음';
-            document.getElementById('heading').textContent = position.coords.heading ? `${position.coords.heading.toFixed(2)}°` : '정보 없음';
+            document.getElementById('accuracy').textContent =
+                position.coords.accuracy !== null && position.coords.accuracy !== undefined
+                ? `${position.coords.accuracy.toFixed(2)} m` : '정보 없음';
+            document.getElementById('altitude').textContent =
+                position.coords.altitude !== null && position.coords.altitude !== undefined
+                ? `${position.coords.altitude.toFixed(2)} m` : '정보 없음';
+            document.getElementById('speed').textContent =
+                position.coords.speed !== null && position.coords.speed !== undefined
+                ? `${(position.coords.speed * 3.6).toFixed(2)} km/h` : '정보 없음';
+            document.getElementById('heading').textContent =
+                position.coords.heading !== null && position.coords.heading !== undefined
+                ? `${position.coords.heading.toFixed(2)}°` : '정보 없음';
 
             const date = new Date(position.timestamp);
             document.getElementById('timestamp').textContent = date.toLocaleString('ko-KR');
@@ -506,24 +536,38 @@
             }
         }
 
-        // 기록 목록 업데이트
+        // 기록 목록 업데이트 (XSS 방지를 위해 DOM API 사용)
         function updateHistoryList() {
             const listElement = document.getElementById('historyList');
+            listElement.innerHTML = ''; // 기존 내용 제거
 
             if (locationHistory.length === 0) {
-                listElement.innerHTML = '<p style="color: #6c757d; text-align: center;">아직 저장된 위치가 없습니다.</p>';
+                const emptyMsg = document.createElement('p');
+                emptyMsg.style.color = '#6c757d';
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.textContent = '아직 저장된 위치가 없습니다.';
+                listElement.appendChild(emptyMsg);
                 return;
             }
 
-            listElement.innerHTML = locationHistory.map((item, index) => `
-                <div class="history-item">
-                    <div class="timestamp">${item.timestamp}</div>
-                    <div class="location">
-                        위도: ${item.latitude.toFixed(6)}, 경도: ${item.longitude.toFixed(6)}<br>
-                        정확도: ${item.accuracy ? item.accuracy.toFixed(2) + ' m' : '정보 없음'}
-                    </div>
-                </div>
-            `).join('');
+            locationHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = item.timestamp;
+
+                const location = document.createElement('div');
+                location.className = 'location';
+                const accuracyText = item.accuracy !== null && item.accuracy !== undefined
+                    ? item.accuracy.toFixed(2) + ' m' : '정보 없음';
+                location.textContent = `위도: ${item.latitude.toFixed(6)}, 경도: ${item.longitude.toFixed(6)}\n정확도: ${accuracyText}`;
+
+                historyItem.appendChild(timestamp);
+                historyItem.appendChild(location);
+                listElement.appendChild(historyItem);
+            });
         }
 
         // 상태 메시지 표시
