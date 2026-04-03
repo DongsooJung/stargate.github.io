@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stargate Decision Framework v3.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--surface:#12121a;--border:#1e1e2e;--accent:#6366f1;--accent2:#8b5cf6;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--blue:#3b82f6;--text:#e2e8f0;--muted:#64748b}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+header{text-align:center;padding:40px 0 30px;position:relative}
+header h1{font-size:2.2em;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+header .subtitle{color:var(--muted);font-size:.95em}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:4px 12px;border-radius:20px;font-size:.75em;margin-bottom:12px;color:#fff}
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:24px;border:1px solid var(--border)}
+.tab{flex:1;padding:12px;text-align:center;border-radius:8px;cursor:pointer;transition:all .3s;color:var(--muted);font-weight:500;font-size:.9em}
+.tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 10px rgba(99,102,241,.3)}
+.tab:hover:not(.active){background:rgba(99,102,241,.1);color:var(--text)}
+.panel{display:none;animation:fadeIn .4s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px}
+.card h3{font-size:1.1em;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.input-group{margin-bottom:12px}
+.input-group label{display:block;font-size:.85em;color:var(--muted);margin-bottom:6px}
+input[type="text"],textarea,select{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9em;transition:border-color .3s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+.btn{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.9em;transition:all .3s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:100%;margin-top:12px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(99,102,241,.4)}
+.btn-sm{padding:8px 16px;font-size:.8em;border-radius:6px}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.swot-box{border-radius:12px;padding:16px;min-height:120px}
+.swot-box h4{font-size:.9em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.swot-box ul{list-style:none;padding:0}
+.swot-box li{padding:4px 0;font-size:.85em;border-bottom:1px solid rgba(255,255,255,.05)}
+.swot-box li:last-child{border:none}
+.s-box{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)}
+.s-box h4{color:var(--green)}
+.w-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
+.w-box h4{color:var(--red)}
+.o-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2)}
+.o-box h4{color:var(--blue)}
+.t-box{background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2)}
+.t-box h4{color:var(--yellow)}
+.matrix-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:16px;border-radius:12px;overflow:hidden}
+.matrix-table th,.matrix-table td{padding:12px;text-align:center;border:1px solid var(--border);font-size:.85em}
+.matrix-table th{background:rgba(99,102,241,.15);color:var(--accent);font-weight:600}
+.matrix-table td{background:var(--surface)}
+.score{font-size:1.5em;font-weight:700}
+.score.high{color:var(--green)}
+.score.mid{color:var(--yellow)}
+.score.low{color:var(--red)}
+.result-card{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.1));border:1px solid rgba(99,102,241,.3);border-radius:16px;padding:24px;margin-top:16px;text-align:center}
+.result-card .verdict{font-size:1.8em;font-weight:700;margin:12px 0}
+.result-card .verdict.go{color:var(--green)}
+.result-card .verdict.caution{color:var(--yellow)}
+.result-card .verdict.nogo{color:var(--red)}
+.meter{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:8px 0}
+.meter-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.risk-tag{display:inline-block;padding:4px 10px;border-radius:12px;font-size:.75em;font-weight:600;margin:2px}
+.risk-high{background:rgba(239,68,68,.15);color:var(--red)}
+.risk-mid{background:rgba(234,179,8,.15);color:var(--yellow)}
+.risk-low{background:rgba(34,197,94,.15);color:var(--green)}
+.flex{display:flex;gap:12px;align-items:center}
+.flex-wrap{flex-wrap:wrap}
+.chip{padding:6px 14px;border-radius:20px;font-size:.8em;cursor:pointer;transition:all .3s;border:1px solid var(--border);color:var(--muted)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip:hover:not(.active){border-color:var(--accent);color:var(--text)}
+#history-list{max-height:400px;overflow-y:auto}
+.history-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .3s}
+.history-item:hover{border-color:var(--accent)}
+.history-item .title{font-weight:600;font-size:.9em}
+.history-item .meta{font-size:.75em;color:var(--muted);margin-top:4px}
+.empty-state{text-align:center;padding:40px;color:var(--muted)}
+footer{text-align:center;padding:30px 0;color:var(--muted);font-size:.8em;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--accent);text-decoration:none}
+@media(max-width:768px){.swot-grid{grid-template-columns:1fr}.container{padding:12px}header h1{font-size:1.6em}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div class="badge">v3.0</div>
+<h1>Stargate Decision Framework</h1>
+<p class="subtitle">SWOT + Weighted Matrix + Risk Analysis</p>
+</header>
+<div class="tabs">
+<div class="tab active" onclick="showTab(0)">SWOT</div>
+<div class="tab" onclick="showTab(1)">Matrix</div>
+<div class="tab" onclick="showTab(2)">Risk</div>
+<div class="tab" onclick="showTab(3)">History</div>
+</div>
+<div class="panel active" id="panel-0">
+<div class="card">
+<h3>Decision</h3>
+<div class="input-group">
+<label>Decision Statement</label>
+<input type="text" id="decision-title" placeholder="e.g. SaaS Global Expansion">
+</div>
+<div class="input-group">
+<label>Category</label>
+<div class="flex flex-wrap" id="category-chips">
+<div class="chip active" data-cat="business">Business</div>
+<div class="chip" data-cat="tech">Tech</div>
+<div class="chip" data-cat="invest">Finance</div>
+<div class="chip" data-cat="hr">HR</div>
+<div class="chip" data-cat="policy">Policy</div>
+<div class="chip" data-cat="urban">Urban</div>
+</div>
+</div>
+<div class="input-group">
+<label>Deadline</label>
+<input type="text" id="deadline" placeholder="e.g. 2026-04-30">
+</div>
+</div>
+<div class="card"><h3>Strengths</h3><textarea id="strengths" placeholder="One per line"></textarea></div>
+<div class="card"><h3>Weaknesses</h3><textarea id="weaknesses" placeholder="One per line"></textarea></div>
+<div class="card"><h3>Opportunities</h3><textarea id="opportunities" placeholder="One per line"></textarea></div>
+<div class="card"><h3>Threats</h3><textarea id="threats" placeholder="One per line"></textarea></div>
+<button class="btn btn-primary" onclick="generateSWOT()">Generate SWOT</button>
+<div id="swot-result" style="display:none;margin-top:20px">
+<div class="card">
+<h3>SWOT Result</h3>
+<div class="swot-grid" id="swot-grid"></div>
+<div id="swot-summary" style="margin-top:16px;padding:16px;background:var(--bg);border-radius:8px;font-size:.85em"></div>
+</div>
+</div>
+</div>
+<div class="panel" id="panel-1">
+<div class="card">
+<h3>Weighted Matrix</h3>
+<p style="font-size:.85em;color:var(--muted);margin-bottom:16px">Set weight and score for each criterion.</p>
+<div id="criteria-list"></div>
+<div class="flex" style="margin-top:12px">
+<input type="text" id="new-criterion" placeholder="Add criterion" style="flex:1">
+<button class="btn btn-sm btn-outline" onclick="addCriterion()">+ Add</button>
+</div>
+<button class="btn btn-primary" onclick="calculateMatrix()">Calculate</button>
+</div>
+<div id="matrix-result" style="display:none;margin-top:16px">
+<div class="card" id="matrix-card"></div>
+</div>
+</div>
+<div class="panel" id="panel-2">
+<div class="card">
+<h3>Risk Matrix</h3>
+<p style="font-size:.85em;color:var(--muted);margin-bottom:16px">Evaluate probability and impact for each risk.</p>
+<div id="risk-items"></div>
+<button class="btn btn-primary" onclick="calculateRisk()">Analyze Risk</button>
+</div>
+<div id="risk-result" style="display:none;margin-top:16px">
+<div class="card"><h3>Risk Profile</h3><div id="risk-profile"></div></div>
+<div class="result-card" id="final-verdict"></div>
+</div>
+</div>
+<div class="panel" id="panel-3">
+<div class="card"><h3>History</h3><div id="history-list"></div></div>
+</div>
+<footer>
+<p>Stargate Decision Framework v3.0 &mdash; <a href="https://stargate11.com">Dongsoo Jung</a></p>
+<p style="margin-top:4px">SNU PhD &middot; AI &amp; Cybersecurity &middot; <a href="https://stargate11.com">stargate11.com</a></p>
+</footer>
+</div>
+<script>
+let state={title:'',category:'business',deadline:'',strengths:[],weaknesses:[],opportunities:[],threats:[],criteria:[{name:'Market Size',weight:5,score:0},{name:'Tech Feasibility',weight:4,score:0},{name:'Profitability',weight:5,score:0},{name:'Competitive Edge',weight:3,score:0},{name:'Risk Level',weight:4,score:0},{name:'Execution Speed',weight:3,score:0}],risks:[]};
+let history=[];try{history=JSON.parse(localStorage.getItem('df_history')||'[]')}catch(e){}
+function showTab(i){document.querySelectorAll('.tab').forEach((t,x)=>t.classList.toggle('active',x===i));document.querySelectorAll('.panel').forEach((p,x)=>p.classList.toggle('active',x===i));if(i===1)renderCriteria();if(i===2)renderRiskItems();if(i===3)renderHistory()}
+document.querySelectorAll('#category-chips .chip').forEach(c=>{c.addEventListener('click',()=>{document.querySelectorAll('#category-chips .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.category=c.dataset.cat})});
+function parseLines(id){return document.getElementById(id).value.split('\n').map(s=>s.trim()).filter(Boolean)}
+function generateSWOT(){state.title=document.getElementById('decision-title').value||'Untitled';state.deadline=document.getElementById('deadline').value;state.strengths=parseLines('strengths');state.weaknesses=parseLines('weaknesses');state.opportunities=parseLines('opportunities');state.threats=parseLines('threats');const grid=document.getElementById('swot-grid');grid.innerHTML='<div class="swot-box s-box"><h4>Strengths ('+state.strengths.length+')</h4><ul>'+state.strengths.map(s=>'<li>'+s+'</li>').join('')+'</ul></div><div class="swot-box w-box"><h4>Weaknesses ('+state.weaknesses.length+')</h4><ul>'+state.weaknesses.map(s=>'<li>'+s+'</li>').join('')+'</ul></div><div class="swot-box o-box"><h4>Opportunities ('+state.opportunities.length+')</h4><ul>'+state.opportunities.map(s=>'<li>'+s+'</li>').join('')+'</ul></div><div class="swot-box t-box"><h4>Threats ('+state.threats.length+')</h4><ul>'+state.threats.map(s=>'<li>'+s+'</li>').join('')+'</ul></div>';const sS=state.strengths.length+state.opportunities.length;const wS=state.weaknesses.length+state.threats.length;const ratio=sS/Math.max(sS+wS,1);const pct=Math.round(ratio*100);let cls=pct>=60?'high':pct>=40?'mid':'low';let col=pct>=60?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';document.getElementById('swot-summary').innerHTML='<strong>Balance: <span class="score '+cls+'">'+pct+'</span></strong><div class="meter"><div class="meter-fill" style="width:'+pct+'%;background:'+col+'"></div></div><p style="margin-top:8px">S+O: '+sS+' vs W+T: '+wS+'</p>';document.getElementById('swot-result').style.display='block';state.risks=[...state.weaknesses.map(w=>({name:w,type:'W',prob:3,impact:3})),...state.threats.map(t=>({name:t,type:'T',prob:3,impact:3}))]}
+function renderCriteria(){const el=document.getElementById('criteria-list');el.innerHTML=state.criteria.map((c,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:var(--bg);border-radius:8px"><span style="flex:1;font-size:.85em">'+c.name+'</span><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Weight</div><select onchange="state.criteria['+i+'].weight=+this.value" style="width:60px;padding:6px">'+[1,2,3,4,5].map(v=>'<option '+(v===c.weight?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Score</div><select onchange="state.criteria['+i+'].score=+this.value" style="width:60px;padding:6px">'+[0,1,2,3,4,5,6,7,8,9,10].map(v=>'<option '+(v===c.score?'selected':'')+'>'+v+'</option>').join('')+'</select></div><button class="btn btn-sm btn-outline" onclick="state.criteria.splice('+i+',1);renderCriteria()" style="color:var(--red);border-color:var(--red)">X</button></div>').join('')}
+function addCriterion(){const inp=document.getElementById('new-criterion');if(inp.value.trim()){state.criteria.push({name:inp.value.trim(),weight:3,score:0});inp.value='';renderCriteria()}}
+function calculateMatrix(){const mx=state.criteria.reduce((s,c)=>s+c.weight*10,0);const ac=state.criteria.reduce((s,c)=>s+c.weight*c.score,0);const pct=Math.round(ac/Math.max(mx,1)*100);let v=pct>=65?'GO':pct>=40?'CONDITIONAL':'NO-GO';document.getElementById('matrix-card').innerHTML='<h3>Matrix Result</h3><table class="matrix-table"><tr><th>Criterion</th><th>Weight</th><th>Score</th><th>Weighted</th></tr>'+state.criteria.map(c=>'<tr><td>'+c.name+'</td><td>'+c.weight+'</td><td>'+c.score+'/10</td><td><strong>'+c.weight*c.score+'</strong></td></tr>').join('')+'<tr style="background:rgba(99,102,241,.1)"><td><strong>Total</strong></td><td>'+state.criteria.reduce((s,c)=>s+c.weight,0)+'</td><td>-</td><td><strong>'+ac+'/'+mx+'</strong></td></tr></table><div class="result-card" style="margin-top:16px"><p>Weighted Score</p><div class="verdict '+(pct>=65?'go':pct>=40?'caution':'nogo')+'">'+pct+'% - '+v+'</div><div class="meter"><div class="meter-fill" style="width:'+pct+'%;background:'+(pct>=65?'var(--green)':pct>=40?'var(--yellow)':'var(--red)')+'"></div></div></div>';document.getElementById('matrix-result').style.display='block'}
+function renderRiskItems(){const el=document.getElementById('risk-items');if(!state.risks.length){el.innerHTML='<div class="empty-state">Run SWOT first.</div>';return}el.innerHTML=state.risks.map((r,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:10px;background:var(--bg);border-radius:8px"><span class="risk-tag '+(r.type==='T'?'risk-high':'risk-mid')+'">'+r.type+'</span><span style="flex:1;font-size:.85em">'+r.name+'</span><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Prob</div><select onchange="state.risks['+i+'].prob=+this.value" style="width:55px;padding:6px">'+[1,2,3,4,5].map(v=>'<option '+(v===r.prob?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Impact</div><select onchange="state.risks['+i+'].impact=+this.value" style="width:55px;padding:6px">'+[1,2,3,4,5].map(v=>'<option '+(v===r.impact?'selected':'')+'>'+v+'</option>').join('')+'</select></div></div>').join('')}
+function calculateRisk(){if(!state.risks.length)return;const scored=state.risks.map(r=>({...r,riskScore:r.prob*r.impact}));scored.sort((a,b)=>b.riskScore-a.riskScore);const avg=scored.reduce((s,r)=>s+r.riskScore,0)/scored.length;const mx=Math.max(...scored.map(r=>r.riskScore));document.getElementById('risk-profile').innerHTML='<table class="matrix-table"><tr><th>Risk</th><th>Type</th><th>Prob</th><th>Impact</th><th>Score</th><th>Grade</th></tr>'+scored.map(r=>{let g=r.riskScore>=16?'CRITICAL':r.riskScore>=9?'HIGH':r.riskScore>=4?'MEDIUM':'LOW';let c=r.riskScore>=16?'risk-high':r.riskScore>=9?'risk-mid':'risk-low';return'<tr><td>'+r.name+'</td><td>'+r.type+'</td><td>'+r.prob+'</td><td>'+r.impact+'</td><td><strong>'+r.riskScore+'</strong></td><td><span class="risk-tag '+c+'">'+g+'</span></td></tr>'}).join('')+'</table><div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:.85em"><p>Avg Risk: <strong>'+avg.toFixed(1)+'</strong>/25 | Max: <strong>'+mx+'</strong>/25</p></div>';const sb=(state.strengths.length+state.opportunities.length)/Math.max(state.strengths.length+state.opportunities.length+state.weaknesses.length+state.threats.length,1);const ms=state.criteria.reduce((s,c)=>s+c.weight*c.score,0)/Math.max(state.criteria.reduce((s,c)=>s+c.weight*10,0),1);const rf=1-(avg/25);const fs=Math.round((sb*.3+ms*.4+rf*.3)*100);let fc=fs>=65?'go':fs>=40?'caution':'nogo';let fl=fs>=65?'GO':fs>=40?'CONDITIONAL':'NO-GO';document.getElementById('final-verdict').innerHTML='<p style="font-size:.9em;color:var(--muted)">Final Decision Score</p><div class="verdict '+fc+'">'+fs+'</div><div class="meter"><div class="meter-fill" style="width:'+fs+'%;background:'+(fs>=65?'var(--green)':fs>=40?'var(--yellow)':'var(--red)')+'"></div></div><p style="margin-top:8px;font-size:1.1em;font-weight:600">'+fl+'</p><p style="margin-top:12px;font-size:.8em;color:var(--muted)">SWOT(30%):'+Math.round(sb*100)+' | Matrix(40%):'+Math.round(ms*100)+' | Risk(30%):'+Math.round(rf*100)+'</p><button class="btn btn-sm btn-outline" style="margin-top:16px" onclick="saveToHistory()">Save</button>';document.getElementById('risk-result').style.display='block'}
+function saveToHistory(){const e={id:Date.now(),title:state.title,category:state.category,date:new Date().toISOString().split('T')[0],state:JSON.parse(JSON.stringify(state))};history.unshift(e);try{localStorage.setItem('df_history',JSON.stringify(history.slice(0,20)))}catch(x){}alert('Saved!')}
+function renderHistory(){const el=document.getElementById('history-list');if(!history.length){el.innerHTML='<div class="empty-state">No saved analyses yet.</div>';return}el.innerHTML=history.map(h=>'<div class="history-item" onclick="loadHistory('+h.id+')"><div class="title">'+h.title+'</div><div class="meta">'+h.date+' | '+h.category+'</div></div>').join('')}
+function loadHistory(id){const h=history.find(x=>x.id==id);if(!h)return;state=JSON.parse(JSON.stringify(h.state));document.getElementById('decision-title').value=state.title;document.getElementById('deadline').value=state.deadline||'';document.getElementById('strengths').value=state.strengths.join('\n');document.getElementById('weaknesses').value=state.weaknesses.join('\n');document.getElementById('opportunities').value=state.opportunities.join('\n');document.getElementById('threats').value=state.threats.join('\n');showTab(0);generateSWOT()}
+</script>
+</body>
+</html>
