@@ -522,6 +522,54 @@
             });
         });
     </script>
+
+<!-- DECISION OS v3.0 Button -->
+<style>
+.dcos-fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 9999;
+  background: linear-gradient(135deg, #00e5ff, #ffab00);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 0 28px rgba(0,229,255,0.4);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Orbitron', 'JetBrains Mono', monospace;
+  animation: fabPulse 3s ease infinite;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+.dcos-fab:hover { box-shadow: 0 0 40px rgba(0,229,255,0.7); transform: translateY(-2px); }
+.dcos-fab-inner {
+  background: #020408;
+  margin: 2px 2px 2px 0;
+  padding: 12px 22px 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+.dcos-fab-icon { font-size: 16px; }
+.dcos-fab-text { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #00e5ff; line-height: 1.3; }
+.dcos-fab-text span { display: block; font-size: 8px; color: #ffab00; letter-spacing: 3px; }
+@keyframes fabPulse {
+  0%,100%{ box-shadow: 0 0 28px rgba(0,229,255,0.4); }
+  50%{ box-shadow: 0 0 40px rgba(0,229,255,0.7), 0 0 60px rgba(255,171,0,0.3); }
+}
+</style>
+<a class="dcos-fab" href="/decision.html" title="DECISION OS v3.0">
+  <div class="dcos-fab-inner">
+    <span class="dcos-fab-icon">⚡</span>
+    <div class="dcos-fab-text">DECISION OS<span>v3.0 · STARGATE</span></div>
+  </div>
+</a>
+
 </body>
 </html>
 
