@@ -3,200 +3,1189 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stargate Decision Framework v3.0</title>
+<title>STARGATE DECISION OS v3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Serif+KR:wght@300;400;600;900&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0f;--surface:#12121a;--border:#1e1e2e;--accent:#6366f1;--accent2:#8b5cf6;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--blue:#3b82f6;--text:#e2e8f0;--muted:#64748b}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-.container{max-width:1200px;margin:0 auto;padding:20px}
-header{text-align:center;padding:40px 0 30px;position:relative}
-header h1{font-size:2.2em;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
-header .subtitle{color:var(--muted);font-size:.95em}
-.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:4px 12px;border-radius:20px;font-size:.75em;margin-bottom:12px;color:#fff}
-.tabs{display:flex;gap:4px;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:24px;border:1px solid var(--border)}
-.tab{flex:1;padding:12px;text-align:center;border-radius:8px;cursor:pointer;transition:all .3s;color:var(--muted);font-weight:500;font-size:.9em}
-.tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 10px rgba(99,102,241,.3)}
-.tab:hover:not(.active){background:rgba(99,102,241,.1);color:var(--text)}
-.panel{display:none;animation:fadeIn .4s ease}
-.panel.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px}
-.card h3{font-size:1.1em;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.input-group{margin-bottom:12px}
-.input-group label{display:block;font-size:.85em;color:var(--muted);margin-bottom:6px}
-input[type="text"],textarea,select{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9em;transition:border-color .3s}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
-textarea{resize:vertical;min-height:80px}
-.btn{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.9em;transition:all .3s}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:100%;margin-top:12px}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(99,102,241,.4)}
-.btn-sm{padding:8px 16px;font-size:.8em;border-radius:6px}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.swot-box{border-radius:12px;padding:16px;min-height:120px}
-.swot-box h4{font-size:.9em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.swot-box ul{list-style:none;padding:0}
-.swot-box li{padding:4px 0;font-size:.85em;border-bottom:1px solid rgba(255,255,255,.05)}
-.swot-box li:last-child{border:none}
-.s-box{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)}
-.s-box h4{color:var(--green)}
-.w-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
-.w-box h4{color:var(--red)}
-.o-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2)}
-.o-box h4{color:var(--blue)}
-.t-box{background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2)}
-.t-box h4{color:var(--yellow)}
-.matrix-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:16px;border-radius:12px;overflow:hidden}
-.matrix-table th,.matrix-table td{padding:12px;text-align:center;border:1px solid var(--border);font-size:.85em}
-.matrix-table th{background:rgba(99,102,241,.15);color:var(--accent);font-weight:600}
-.matrix-table td{background:var(--surface)}
-.score{font-size:1.5em;font-weight:700}
-.score.high{color:var(--green)}
-.score.mid{color:var(--yellow)}
-.score.low{color:var(--red)}
-.result-card{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.1));border:1px solid rgba(99,102,241,.3);border-radius:16px;padding:24px;margin-top:16px;text-align:center}
-.result-card .verdict{font-size:1.8em;font-weight:700;margin:12px 0}
-.result-card .verdict.go{color:var(--green)}
-.result-card .verdict.caution{color:var(--yellow)}
-.result-card .verdict.nogo{color:var(--red)}
-.meter{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:8px 0}
-.meter-fill{height:100%;border-radius:4px;transition:width .8s ease}
-.risk-tag{display:inline-block;padding:4px 10px;border-radius:12px;font-size:.75em;font-weight:600;margin:2px}
-.risk-high{background:rgba(239,68,68,.15);color:var(--red)}
-.risk-mid{background:rgba(234,179,8,.15);color:var(--yellow)}
-.risk-low{background:rgba(34,197,94,.15);color:var(--green)}
-.flex{display:flex;gap:12px;align-items:center}
-.flex-wrap{flex-wrap:wrap}
-.chip{padding:6px 14px;border-radius:20px;font-size:.8em;cursor:pointer;transition:all .3s;border:1px solid var(--border);color:var(--muted)}
-.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.chip:hover:not(.active){border-color:var(--accent);color:var(--text)}
-#history-list{max-height:400px;overflow-y:auto}
-.history-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .3s}
-.history-item:hover{border-color:var(--accent)}
-.history-item .title{font-weight:600;font-size:.9em}
-.history-item .meta{font-size:.75em;color:var(--muted);margin-top:4px}
-.empty-state{text-align:center;padding:40px;color:var(--muted)}
-footer{text-align:center;padding:30px 0;color:var(--muted);font-size:.8em;border-top:1px solid var(--border);margin-top:40px}
-footer a{color:var(--accent);text-decoration:none}
-@media(max-width:768px){.swot-grid{grid-template-columns:1fr}.container{padding:12px}header h1{font-size:1.6em}}
+:root {
+  --bg: #020408;
+  --bg2: #050c18;
+  --surface: #070d1a;
+  --surface2: #0a1428;
+  --border: #0e1e38;
+  --border2: #162840;
+  --cyan: #00e5ff;
+  --cyan-dim: #005f6b;
+  --amber: #ffab00;
+  --amber-dim: #6b4800;
+  --purple: #c084fc;
+  --go: #00e676;
+  --go-dim: #003d1e;
+  --delegate: #2979ff;
+  --schedule: #ff6d00;
+  --drop: #ff1744;
+  --text: #cdd5e8;
+  --text-dim: #4a5c7a;
+  --text-bright: #e8f0ff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Serif KR', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* Canvas starfield */
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.012) 2px, rgba(0,229,255,0.012) 4px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.wrap { position: relative; z-index: 2; max-width: 1140px; margin: 0 auto; padding: 32px 20px 60px; }
+
+/* ═══════════════ HEADER ═══════════════ */
+.hud-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 20px 28px;
+  border: 1px solid var(--border2);
+  background: rgba(7,13,26,0.9);
+  margin-bottom: 32px;
+  backdrop-filter: blur(12px);
+  animation: bootIn 1s ease;
+  position: relative;
+  overflow: hidden;
+}
+.hud-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--amber), transparent);
+  animation: scanH 3s linear infinite;
+}
+@keyframes scanH { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+.hud-left { font-family: 'JetBrains Mono', monospace; }
+.hud-left .sys-status {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--go);
+  margin-bottom: 4px;
+}
+.hud-left .sys-status::before {
+  content: '▶ ';
+  animation: blink 1.2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hud-left .sys-id { font-size: 11px; color: var(--text-dim); letter-spacing: 2px; }
+
+.hud-center { text-align: center; }
+.logo-mark {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(22px, 4vw, 36px);
+  letter-spacing: 6px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--cyan) 40%, var(--amber) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.logo-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 5px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+.version-chip {
+  display: inline-block;
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  background: var(--cyan);
+  color: var(--bg);
+  padding: 2px 8px;
+  letter-spacing: 2px;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.hud-right { text-align: right; font-family: 'JetBrains Mono', monospace; }
+.live-clock { font-size: 22px; color: var(--cyan); letter-spacing: 2px; font-weight: 700; }
+.live-date { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-top: 4px; }
+
+/* ═══════════════ SECTION HEADERS ═══════════════ */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  margin-top: 40px;
+}
+.sec-head .tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  border: 1px solid var(--cyan-dim);
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.sec-head::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+
+/* ═══════════════ CHANNEL DASHBOARD ═══════════════ */
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.channel-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s, border-color 0.25s;
+}
+.channel-card:hover { transform: translateY(-4px); }
+.channel-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+}
+.ch1::after { background: linear-gradient(90deg, var(--amber), transparent); border-color: var(--amber-dim); }
+.ch1 { border-color: var(--amber-dim); }
+.ch2::after { background: linear-gradient(90deg, var(--cyan), transparent); border-color: var(--cyan-dim); }
+.ch2 { border-color: var(--cyan-dim); }
+.ch3::after { background: linear-gradient(90deg, var(--purple), transparent); }
+.ch3 { border-color: #3b2060; }
+
+.ch-icon { font-size: 24px; margin-bottom: 10px; }
+.ch-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.ch1 .ch-name { color: var(--amber); }
+.ch2 .ch-name { color: var(--cyan); }
+.ch3 .ch-name { color: var(--purple); }
+
+.ch-desc { font-size: 11px; color: var(--text-dim); margin-bottom: 14px; }
+.ch-bar-wrap { background: var(--border); height: 3px; border-radius: 2px; overflow: hidden; }
+.ch-bar { height: 100%; border-radius: 2px; animation: barGrow 1.5s ease; }
+.ch1 .ch-bar { background: var(--amber); width: 78%; }
+.ch2 .ch-bar { background: var(--cyan); width: 45%; }
+.ch3 .ch-bar { background: var(--purple); width: 62%; }
+@keyframes barGrow { from { width: 0; } }
+.ch-meta { display: flex; justify-content: space-between; margin-top: 8px; }
+.ch-meta span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* ═══════════════ QUICK TRIAGE ═══════════════ */
+.triage-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 28px;
+}
+.triage-flow { display: flex; flex-direction: column; gap: 0; }
+.triage-q {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+.triage-q.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+.q-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+}
+.q-text {
+  font-size: 15px;
+  color: var(--text-bright);
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+.q-context { font-size: 11px; color: var(--text-dim); margin-bottom: 18px; font-family: 'JetBrains Mono', monospace; }
+.q-btns { display: flex; gap: 12px; }
+.q-btn {
+  flex: 1;
+  padding: 12px 0;
+  border: 1px solid;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+.q-btn.yes { border-color: var(--go); color: var(--go); }
+.q-btn.yes:hover { background: var(--go-dim); }
+.q-btn.no { border-color: var(--drop); color: var(--drop); }
+.q-btn.no:hover { background: rgba(255,23,68,0.1); }
+
+.triage-result {
+  display: none;
+  padding: 24px;
+  border: 1px solid;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+.triage-result.show { display: block; }
+.verdict-big {
+  font-family: 'Orbitron', monospace;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  margin-bottom: 10px;
+}
+.verdict-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
+.triage-reset {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 8px 20px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+}
+.triage-reset:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ═══════════════ SCORE RING ═══════════════ */
+.scorer-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 28px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 28px;
+}
+.ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.ring-svg { width: 180px; height: 180px; }
+.ring-bg { fill: none; stroke: var(--border2); stroke-width: 10; }
+.ring-fill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.25, 1, 0.5, 1), stroke 0.4s;
+  stroke-dasharray: 440;
+  stroke-dashoffset: 220;
+}
+.ring-score-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 38px;
+  font-weight: 900;
+  fill: var(--text-bright);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  transition: fill 0.4s;
+}
+.ring-score-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  fill: var(--text-dim);
+  text-anchor: middle;
+  letter-spacing: 3px;
+}
+.ring-verdict-text {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+.sliders-col { display: flex; flex-direction: column; gap: 14px; }
+.sl-row { display: grid; grid-template-columns: 1fr 60px; gap: 10px; align-items: center; }
+.sl-label {
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.sl-weight {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+}
+input[type=range] {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 2px;
+  background: var(--border2);
+  outline: none;
+  cursor: pointer;
+  border-radius: 1px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cyan);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--cyan);
+}
+.sl-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: right;
+  transition: color 0.3s;
+}
+
+/* ═══════════════ DECISION MATRIX ═══════════════ */
+.matrix-wrap {
+  display: grid;
+  grid-template-columns: 24px 1fr 1fr;
+  grid-template-rows: 1fr 1fr 24px;
+  gap: 3px;
+  height: 320px;
+}
+.mx-axis-y {
+  grid-row: 1/3; grid-column: 1;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+}
+.mx-cell {
+  padding: 18px 16px;
+  border: 1px solid var(--border2);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--surface);
+}
+.mx-cell:hover {
+  transform: scale(1.025);
+  z-index: 3;
+}
+.mx-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.mx-cell:hover::before { opacity: 0.07; }
+
+.mx-go { border-color: rgba(0,230,118,0.3); }
+.mx-go:hover { box-shadow: 0 0 20px rgba(0,230,118,0.2); }
+.mx-go::before { background: var(--go); }
+.mx-delegate { border-color: rgba(41,121,255,0.3); }
+.mx-delegate:hover { box-shadow: 0 0 20px rgba(41,121,255,0.2); }
+.mx-delegate::before { background: var(--delegate); }
+.mx-schedule { border-color: rgba(255,109,0,0.3); }
+.mx-schedule:hover { box-shadow: 0 0 20px rgba(255,109,0,0.2); }
+.mx-schedule::before { background: var(--schedule); }
+.mx-drop { border-color: rgba(255,23,68,0.3); }
+.mx-drop:hover { box-shadow: 0 0 20px rgba(255,23,68,0.2); }
+.mx-drop::before { background: var(--drop); }
+
+.mx-corner { font-family:'JetBrains Mono',monospace; font-size:8px; color:var(--text-dim); letter-spacing:2px; margin-bottom:8px; }
+.mx-title { font-family:'Orbitron',monospace; font-size:18px; font-weight:900; letter-spacing:2px; margin-bottom:8px; }
+.mx-go .mx-title { color: var(--go); }
+.mx-delegate .mx-title { color: var(--delegate); }
+.mx-schedule .mx-title { color: var(--schedule); }
+.mx-drop .mx-title { color: var(--drop); }
+.mx-examples { font-size: 10px; color: var(--text-dim); line-height: 1.7; }
+.mx-axis-x {
+  display: flex; align-items: center; justify-content: center;
+  font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:3px; color:var(--text-dim);
+}
+
+/* ═══════════════ AI SWOT ═══════════════ */
+.swot-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 28px;
+}
+.swot-input-row { display: flex; gap: 12px; margin-bottom: 24px; }
+.swot-input {
+  flex: 1;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  color: var(--text-bright);
+  padding: 12px 16px;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 13px;
+  outline: none;
+  resize: none;
+  transition: border-color 0.2s;
+}
+.swot-input:focus { border-color: var(--cyan); }
+.swot-input::placeholder { color: var(--text-dim); }
+.swot-btn {
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  padding: 0 24px;
+  cursor: pointer;
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.swot-btn:hover { background: rgba(0,229,255,0.1); box-shadow: 0 0 16px rgba(0,229,255,0.2); }
+.swot-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.swot-loading {
+  text-align: center;
+  padding: 32px;
+  display: none;
+}
+.swot-loading.show { display: block; }
+.loading-ring {
+  width: 40px; height: 40px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-txt { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:2px; }
+
+.swot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  display: none;
+}
+.swot-grid.show { display: grid; }
+.swot-quadrant {
+  padding: 18px 20px;
+  border: 1px solid var(--border2);
+  background: var(--bg2);
+}
+.sq-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sq-label::after { content: ''; flex: 1; height: 1px; }
+.sq-S .sq-label { color: var(--go); }
+.sq-S .sq-label::after { background: var(--go); opacity: 0.3; }
+.sq-W .sq-label { color: var(--drop); }
+.sq-W .sq-label::after { background: var(--drop); opacity: 0.3; }
+.sq-O .sq-label { color: var(--cyan); }
+.sq-O .sq-label::after { background: var(--cyan); opacity: 0.3; }
+.sq-T .sq-label { color: var(--amber); }
+.sq-T .sq-label::after { background: var(--amber); opacity: 0.3; }
+.sq-items { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.sq-items li {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  padding-left: 14px;
+  position: relative;
+}
+.sq-items li::before { content: '—'; position: absolute; left: 0; color: var(--text-dim); }
+
+/* ═══════════════ DECISION LOG ═══════════════ */
+.log-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 0;
+  overflow: hidden;
+}
+.log-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg2);
+}
+.log-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--cyan); }
+.log-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  border: 1px solid var(--border2);
+  padding: 2px 8px;
+}
+.log-add-row {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border2);
+}
+.log-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 12px;
+  outline: none;
+}
+.log-input:focus { border-color: var(--cyan); }
+.log-type-select {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 8px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  outline: none;
+  cursor: pointer;
+}
+.log-add-btn {
+  background: transparent;
+  border: 1px solid var(--go);
+  color: var(--go);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.log-add-btn:hover { background: var(--go-dim); }
+.log-table { width: 100%; border-collapse: collapse; }
+.log-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  padding: 10px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+  background: var(--bg2);
+}
+.log-table td {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.log-table tr:hover td { background: rgba(0,229,255,0.02); }
+.log-empty { text-align: center; padding: 32px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; }
+.verdict-chip {
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  font-weight: 700;
+  border: 1px solid;
+}
+.vc-go { color: var(--go); border-color: var(--go); }
+.vc-delegate { color: var(--delegate); border-color: var(--delegate); }
+.vc-schedule { color: var(--schedule); border-color: var(--schedule); }
+.vc-drop { color: var(--drop); border-color: var(--drop); }
+
+/* ═══════════════ 5 STANDARDS ═══════════════ */
+.standards-hex {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.std-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 20px 16px;
+  transition: transform 0.2s, border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.std-card:hover { transform: translateY(-4px); }
+.std-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.std-card:nth-child(1)::before { background: var(--go); }
+.std-card:nth-child(2)::before { background: var(--cyan); }
+.std-card:nth-child(3)::before { background: var(--amber); }
+.std-card:nth-child(4)::before { background: var(--purple); }
+.std-card:nth-child(5)::before { background: var(--drop); }
+.std-n {
+  font-family: 'Orbitron', monospace;
+  font-size: 36px;
+  font-weight: 900;
+  opacity: 0.08;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.std-name { font-size: 12px; font-weight: 600; color: var(--text-bright); margin-bottom: 8px; }
+.std-desc { font-size: 10px; color: var(--text-dim); line-height: 1.7; }
+
+/* ═══════════════ FOOTER ═══════════════ */
+.footer {
+  margin-top: 48px;
+  border-top: 1px solid var(--border2);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.footer-left { font-family: 'Orbitron', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 3px; }
+.footer-right { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 2px; }
+
+/* Animations */
+@keyframes bootIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+.reveal { animation: reveal 0.7s ease both; }
+@keyframes reveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .channel-grid { grid-template-columns: 1fr; }
+  .scorer-layout { grid-template-columns: 1fr; }
+  .ring-wrap { flex-direction: row; }
+  .standards-hex { grid-template-columns: repeat(2, 1fr); }
+  .hud-header { grid-template-columns: 1fr; text-align: center; gap: 16px; }
+  .hud-right { text-align: center; }
+  .matrix-wrap { height: auto; }
+}
 </style>
 </head>
 <body>
-<div class="container">
-<header>
-<div class="badge">v3.0</div>
-<h1>Stargate Decision Framework</h1>
-<p class="subtitle">SWOT + Weighted Matrix + Risk Analysis</p>
-</header>
-<div class="tabs">
-<div class="tab active" onclick="showTab(0)">SWOT</div>
-<div class="tab" onclick="showTab(1)">Matrix</div>
-<div class="tab" onclick="showTab(2)">Risk</div>
-<div class="tab" onclick="showTab(3)">History</div>
+<canvas id="starfield"></canvas>
+
+<div class="wrap">
+
+  <!-- ══════ HEADER ══════ -->
+  <div class="hud-header">
+    <div class="hud-left">
+      <div class="sys-status">SYSTEM OPERATIONAL</div>
+      <div class="sys-id">CEO // PHD CANDIDATE // OPERATOR</div>
+      <div class="sys-id" style="margin-top:2px;color:#2a3f60">정동수 · DONGSOO JUNG</div>
+    </div>
+    <div class="hud-center">
+      <div class="logo-mark">STARGATE</div>
+      <div class="logo-sub">주식회사 별의문</div>
+      <div class="version-chip">DECISION OS v3.0</div>
+    </div>
+    <div class="hud-right">
+      <div class="live-clock" id="clock">--:--:--</div>
+      <div class="live-date" id="dateStr">2026.04.03</div>
+      <div class="live-date" style="margin-top:6px;color:#1a3050">대치동 · 서울특별시</div>
+    </div>
+  </div>
+
+  <!-- ══════ CHANNEL STATUS ══════ -->
+  <div class="sec-head reveal" style="animation-delay:0.1s">
+    <div class="tag">01 · CHANNEL STATUS</div>
+  </div>
+  <div class="channel-grid reveal" style="animation-delay:0.15s">
+    <div class="channel-card ch1">
+      <div class="ch-icon">🎯</div>
+      <div class="ch-name">DAECHI TUTORING</div>
+      <div class="ch-desc">수학 + KOI/경시 · 1순위 수익 채널</div>
+      <div class="ch-bar-wrap"><div class="ch-bar"></div></div>
+      <div class="ch-meta">
+        <span>PRIORITY ★★★</span>
+        <span>PARETO TOP 20%</span>
+      </div>
+    </div>
+    <div class="channel-card ch2">
+      <div class="ch-icon">📦</div>
+      <div class="ch-name">KMONG PRODUCTS</div>
+      <div class="ch-desc">디지털 제품 · AI 법률킷 · 코딩킷</div>
+      <div class="ch-bar-wrap"><div class="ch-bar"></div></div>
+      <div class="ch-meta">
+        <span>PRIORITY ★★☆</span>
+        <span>BASELINE REVENUE</span>
+      </div>
+    </div>
+    <div class="channel-card ch3">
+      <div class="ch-icon">🏠</div>
+      <div class="ch-name">SHORT-TERM RENTAL</div>
+      <div class="ch-desc">Airbnb · WeHome · ₩120–220만/월</div>
+      <div class="ch-bar-wrap"><div class="ch-bar"></div></div>
+      <div class="ch-meta">
+        <span>PRIORITY ★★☆</span>
+        <span>PASSIVE ASSET</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ QUICK TRIAGE ══════ -->
+  <div class="sec-head reveal" style="animation-delay:0.2s">
+    <div class="tag">02 · QUICK TRIAGE</div>
+  </div>
+  <div class="triage-panel reveal" style="animation-delay:0.25s">
+    <div class="triage-flow">
+      <div class="triage-q active" id="tq0">
+        <div class="q-num">QUESTION 01 / 03</div>
+        <div class="q-text">이 태스크가 3대 핵심 채널(대치동·Kmong·임대)에 <strong style="color:var(--amber)">직접 연결</strong>되는가?</div>
+        <div class="q-context">// 파레토 필터: 상위 20% → 하위 80% 매출 차이</div>
+        <div class="q-btns">
+          <button class="q-btn yes" onclick="triage(0, true)">YES — 핵심 채널 직결</button>
+          <button class="q-btn no" onclick="triage(0, false)">NO — 간접 또는 무관</button>
+        </div>
+      </div>
+      <div class="triage-q" id="tq1">
+        <div class="q-num">QUESTION 02 / 03</div>
+        <div class="q-text">오늘 안에 완료하지 않으면 <strong style="color:var(--drop)">매출 손실</strong>이 발생하는가?</div>
+        <div class="q-context">// 긴급도 판단: 기회비용 vs 딜레이 코스트</div>
+        <div class="q-btns">
+          <button class="q-btn yes" onclick="triage(1, true)">YES — 오늘 필수</button>
+          <button class="q-btn no" onclick="triage(1, false)">NO — 나중에 가능</button>
+        </div>
+      </div>
+      <div class="triage-q" id="tq2">
+        <div class="q-num">QUESTION 03 / 03</div>
+        <div class="q-text">이 작업을 <strong style="color:var(--cyan)">자동화 또는 위임</strong>할 수 있는가?</div>
+        <div class="q-context">// n8n 자동화 · 외주 · AI 대체 가능성 검토</div>
+        <div class="q-btns">
+          <button class="q-btn yes" onclick="triage(2, true)">YES — 자동화 가능</button>
+          <button class="q-btn no" onclick="triage(2, false)">NO — 직접 실행 필요</button>
+        </div>
+      </div>
+      <div class="triage-result" id="triageResult">
+        <div class="verdict-big" id="tvBig"></div>
+        <div class="verdict-sub" id="tvSub"></div>
+        <button class="triage-reset" onclick="resetTriage()">↺ 다시 평가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SCORE RING ══════ -->
+  <div class="sec-head reveal" style="animation-delay:0.3s">
+    <div class="tag">03 · EXECUTION SCORE</div>
+  </div>
+  <div class="scorer-layout reveal" style="animation-delay:0.35s">
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 160 160">
+        <circle class="ring-bg" cx="80" cy="80" r="70"/>
+        <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70" stroke="var(--cyan)"/>
+        <text class="ring-score-num" id="ringNum" x="80" y="76">50</text>
+        <text class="ring-score-label" x="80" y="96">/ 100</text>
+      </svg>
+      <div class="ring-verdict-text" id="ringVerdict" style="color:var(--text-dim)">평가 중...</div>
+    </div>
+    <div class="sliders-col">
+      <div class="sl-row">
+        <div>
+          <div class="sl-label">💰 매출 전환력</div>
+          <div class="sl-weight">가중치 ×0.30</div>
+          <input type="range" min="0" max="10" value="5" id="rs1" oninput="updateRing()">
+        </div>
+        <div class="sl-val" id="rv1" style="color:var(--go)">5</div>
+      </div>
+      <div class="sl-row">
+        <div>
+          <div class="sl-label">✅ 실행 완결도</div>
+          <div class="sl-weight">가중치 ×0.25</div>
+          <input type="range" min="0" max="10" value="5" id="rs2" oninput="updateRing()">
+        </div>
+        <div class="sl-val" id="rv2" style="color:var(--cyan)">5</div>
+      </div>
+      <div class="sl-row">
+        <div>
+          <div class="sl-label">⏱ 시간 효율성</div>
+          <div class="sl-weight">가중치 ×0.20</div>
+          <input type="range" min="0" max="10" value="5" id="rs3" oninput="updateRing()">
+        </div>
+        <div class="sl-val" id="rv3" style="color:var(--amber)">5</div>
+      </div>
+      <div class="sl-row">
+        <div>
+          <div class="sl-label">📐 파레토 정렬도</div>
+          <div class="sl-weight">가중치 ×0.15</div>
+          <input type="range" min="0" max="10" value="5" id="rs4" oninput="updateRing()">
+        </div>
+        <div class="sl-val" id="rv4" style="color:var(--purple)">5</div>
+      </div>
+      <div class="sl-row">
+        <div>
+          <div class="sl-label">🏗 자산 축적도</div>
+          <div class="sl-weight">가중치 ×0.10</div>
+          <input type="range" min="0" max="10" value="5" id="rs5" oninput="updateRing()">
+        </div>
+        <div class="sl-val" id="rv5" style="color:var(--drop)">5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ MATRIX ══════ -->
+  <div class="sec-head reveal" style="animation-delay:0.4s">
+    <div class="tag">04 · DECISION MATRIX</div>
+  </div>
+  <div class="matrix-wrap reveal" style="animation-delay:0.45s">
+    <div class="mx-axis-y">중요도 HIGH ↑ LOW ↓</div>
+    <div class="mx-cell mx-go">
+      <div class="mx-corner">긴급 + 중요</div>
+      <div class="mx-title">즉시 실행</div>
+      <div class="mx-examples">과외 수업 준비<br>Kmong 주문 대응<br>Airbnb 체크인 처리<br>법원 출석 준비</div>
+    </div>
+    <div class="mx-cell mx-schedule">
+      <div class="mx-corner">비긴급 + 중요</div>
+      <div class="mx-title">예약 실행</div>
+      <div class="mx-examples">박사 논문 작성<br>디지털 제품 개발<br>n8n 자동화 구축<br>매출 전략 수립</div>
+    </div>
+    <div class="mx-cell mx-delegate">
+      <div class="mx-corner">긴급 + 비중요</div>
+      <div class="mx-title">위임/자동화</div>
+      <div class="mx-examples">이메일 분류·답변<br>반복 행정 처리<br>SNS 일정 게시<br>파일 정리</div>
+    </div>
+    <div class="mx-cell mx-drop">
+      <div class="mx-corner">비긴급 + 비중요</div>
+      <div class="mx-title">폐기</div>
+      <div class="mx-examples">파레토 80% 밖 작업<br>6개월 이상 누적 항목<br>완벽주의 재작업<br>매출 무관 최적화</div>
+    </div>
+    <div style="grid-column:1"></div>
+    <div class="mx-axis-x">← 긴급도 HIGH</div>
+    <div class="mx-axis-x">긴급도 LOW →</div>
+  </div>
+
+  <!-- ══════ AI SWOT ══════ -->
+  <div class="sec-head reveal" style="animation-delay:0.5s">
+    <div class="tag">05 · AI SWOT GENERATOR</div>
+  </div>
+  <div class="swot-panel reveal" style="animation-delay:0.55s">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-bottom:16px">
+      // 의사결정 주제를 입력하면 Claude가 SWOT 분석을 자동 생성합니다
+    </div>
+    <div class="swot-input-row">
+      <textarea class="swot-input" id="swotInput" rows="2" placeholder="예: 대성학원 강사 지원 vs 프리랜서 유지 / Kmong 신규 상품 출시 / 논문 제출 시기 결정..."></textarea>
+      <button class="swot-btn" id="swotBtn" onclick="generateSWOT()">⚡ GENERATE</button>
+    </div>
+    <div class="swot-loading" id="swotLoading">
+      <div class="loading-ring"></div>
+      <div class="loading-txt">CLAUDE ANALYZING...</div>
+    </div>
+    <div class="swot-grid" id="swotGrid">
+      <div class="swot-quadrant sq-S">
+        <div class="sq-label">S — STRENGTH</div>
+        <ul class="sq-items" id="sqS"></ul>
+      </div>
+      <div class="swot-quadrant sq-W">
+        <div class="sq-label">W — WEAKNESS</div>
+        <ul class="sq-items" id="sqW"></ul>
+      </div>
+      <div class="swot-quadrant sq-O">
+        <div class="sq-label">O — OPPORTUNITY</div>
+        <ul class="sq-items" id="sqO"></ul>
+      </div>
+      <div class="swot-quadrant sq-T">
+        <div class="sq-label">T — THREAT</div>
+        <ul class="sq-items" id="sqT"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ DECISION LOG ══════ -->
+  <div class="sec-head reveal" style="animation-delay:0.6s">
+    <div class="tag">06 · DECISION LOG</div>
+  </div>
+  <div class="log-panel reveal" style="animation-delay:0.65s">
+    <div class="log-header">
+      <div class="log-title">SESSION DECISION LOG</div>
+      <div class="log-count" id="logCount">0 ENTRIES</div>
+    </div>
+    <div class="log-add-row">
+      <input class="log-input" id="logInput" placeholder="의사결정 내용을 입력하세요..." onkeydown="if(event.key==='Enter')addLog()">
+      <select class="log-type-select" id="logType">
+        <option value="go">GO</option>
+        <option value="delegate">DELEGATE</option>
+        <option value="schedule">SCHEDULE</option>
+        <option value="drop">DROP</option>
+      </select>
+      <button class="log-add-btn" onclick="addLog()">+ ADD</button>
+    </div>
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>TIME</th>
+          <th>DECISION</th>
+          <th>VERDICT</th>
+          <th>SCORE</th>
+        </tr>
+      </thead>
+      <tbody id="logBody">
+        <tr><td colspan="4" class="log-empty">// 아직 기록된 의사결정이 없습니다</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════ 5 STANDARDS ══════ -->
+  <div class="sec-head reveal" style="animation-delay:0.7s">
+    <div class="tag">07 · 5대 자기개선 기준</div>
+  </div>
+  <div class="standards-hex reveal" style="animation-delay:0.75s">
+    <div class="std-card">
+      <div class="std-n">01</div>
+      <div class="std-name">실행 강제력</div>
+      <div class="std-desc">시스템 구축 대신 실행 촉구. 직전 액션 팔로업 우선. 미완료 3개↑ 시 새 시스템 거절.</div>
+    </div>
+    <div class="std-card">
+      <div class="std-n">02</div>
+      <div class="std-name">반복 진단 탈출</div>
+      <div class="std-desc">팔로업 먼저, 새 진단 나중. 동일 문제 재진단 전 이전 결과 확인 필수.</div>
+    </div>
+    <div class="std-card">
+      <div class="std-n">03</div>
+      <div class="std-name">산출물 비대화</div>
+      <div class="std-desc">복잡도 비례 응답. 단순 질문 단답. 복잡 요청 구조화. 과잉 설명 금지.</div>
+    </div>
+    <div class="std-card">
+      <div class="std-n">04</div>
+      <div class="std-name">맥락 연속성</div>
+      <div class="std-desc">메모리 우선, 검색 보조. 메모리 범위 내 0회 검색 즉답. 캐리오버 3줄.</div>
+    </div>
+    <div class="std-card">
+      <div class="std-n">05</div>
+      <div class="std-name">정직한 자기평가</div>
+      <div class="std-desc">v2.0 프레임워크 일관 적용. 매출·실행·시간·파레토·자산 5축 점수화.</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer reveal" style="animation-delay:0.85s">
+    <div class="footer-left">STARGATE CORP · 주식회사 별의문 · EST. 2025.08.15</div>
+    <div class="footer-right">DAECHI-DONG, SEOUL · DECISION OS v3.0 · 80/20 PARETO ENGINE</div>
+  </div>
+
 </div>
-<div class="panel active" id="panel-0">
-<div class="card">
-<h3>Decision</h3>
-<div class="input-group">
-<label>Decision Statement</label>
-<input type="text" id="decision-title" placeholder="e.g. SaaS Global Expansion">
-</div>
-<div class="input-group">
-<label>Category</label>
-<div class="flex flex-wrap" id="category-chips">
-<div class="chip active" data-cat="business">Business</div>
-<div class="chip" data-cat="tech">Tech</div>
-<div class="chip" data-cat="invest">Finance</div>
-<div class="chip" data-cat="hr">HR</div>
-<div class="chip" data-cat="policy">Policy</div>
-<div class="chip" data-cat="urban">Urban</div>
-</div>
-</div>
-<div class="input-group">
-<label>Deadline</label>
-<input type="text" id="deadline" placeholder="e.g. 2026-04-30">
-</div>
-</div>
-<div class="card"><h3>Strengths</h3><textarea id="strengths" placeholder="One per line"></textarea></div>
-<div class="card"><h3>Weaknesses</h3><textarea id="weaknesses" placeholder="One per line"></textarea></div>
-<div class="card"><h3>Opportunities</h3><textarea id="opportunities" placeholder="One per line"></textarea></div>
-<div class="card"><h3>Threats</h3><textarea id="threats" placeholder="One per line"></textarea></div>
-<button class="btn btn-primary" onclick="generateSWOT()">Generate SWOT</button>
-<div id="swot-result" style="display:none;margin-top:20px">
-<div class="card">
-<h3>SWOT Result</h3>
-<div class="swot-grid" id="swot-grid"></div>
-<div id="swot-summary" style="margin-top:16px;padding:16px;background:var(--bg);border-radius:8px;font-size:.85em"></div>
-</div>
-</div>
-</div>
-<div class="panel" id="panel-1">
-<div class="card">
-<h3>Weighted Matrix</h3>
-<p style="font-size:.85em;color:var(--muted);margin-bottom:16px">Set weight and score for each criterion.</p>
-<div id="criteria-list"></div>
-<div class="flex" style="margin-top:12px">
-<input type="text" id="new-criterion" placeholder="Add criterion" style="flex:1">
-<button class="btn btn-sm btn-outline" onclick="addCriterion()">+ Add</button>
-</div>
-<button class="btn btn-primary" onclick="calculateMatrix()">Calculate</button>
-</div>
-<div id="matrix-result" style="display:none;margin-top:16px">
-<div class="card" id="matrix-card"></div>
-</div>
-</div>
-<div class="panel" id="panel-2">
-<div class="card">
-<h3>Risk Matrix</h3>
-<p style="font-size:.85em;color:var(--muted);margin-bottom:16px">Evaluate probability and impact for each risk.</p>
-<div id="risk-items"></div>
-<button class="btn btn-primary" onclick="calculateRisk()">Analyze Risk</button>
-</div>
-<div id="risk-result" style="display:none;margin-top:16px">
-<div class="card"><h3>Risk Profile</h3><div id="risk-profile"></div></div>
-<div class="result-card" id="final-verdict"></div>
-</div>
-</div>
-<div class="panel" id="panel-3">
-<div class="card"><h3>History</h3><div id="history-list"></div></div>
-</div>
-<footer>
-<p>Stargate Decision Framework v3.0 &mdash; <a href="https://stargate11.com">Dongsoo Jung</a></p>
-<p style="margin-top:4px">SNU PhD &middot; AI &amp; Cybersecurity &middot; <a href="https://stargate11.com">stargate11.com</a></p>
-</footer>
-</div>
+
 <script>
-let state={title:'',category:'business',deadline:'',strengths:[],weaknesses:[],opportunities:[],threats:[],criteria:[{name:'Market Size',weight:5,score:0},{name:'Tech Feasibility',weight:4,score:0},{name:'Profitability',weight:5,score:0},{name:'Competitive Edge',weight:3,score:0},{name:'Risk Level',weight:4,score:0},{name:'Execution Speed',weight:3,score:0}],risks:[]};
-let history=[];try{history=JSON.parse(localStorage.getItem('df_history')||'[]')}catch(e){}
-function showTab(i){document.querySelectorAll('.tab').forhEach((t,x)=>t.classList.toggle('active',x===i));document.querySelectorAll('.panel').forEach((p,x)=>p.classList.toggle('active',x===i));if(i===1)renderCriteria();if(i===2)renderRiskItems();if(i===3)renderHistory()}
-document.querySelectorAll('#category-chips .chip').forEach(c=>{c.addEventListener('click',()=>{document.querySelectorAll('#category-chips .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.category=c.dataset.cat})});
-function parseLines(id){return document.getElementById(id).value.split('\n').map(s=>s.trim()).filter(Boolean)}
-function generateSWOT(){state.title=document.getElementById('decision-title').value||'Untitled';state.deadline=document.getElementById('deadline').value;state.strengths=parseLines('strengths');state.weaknesses=parseLines('weaknesses');state.opportunities=parseLines('opportunities');state.threats=parseLines('threats');const grid=document.getElementById('swot-grid');grid.innerHTML='<div class="swot-box s-box"><h4>Strengths ('+state.strengths.length+')</h4><ul>'+state.strengths.map(s=>'<li>'+s+'</li>').join('')+'</ul></div><div class="swot-box w-box"><h4>Weaknesses ('+state.weaknesses.length+')</h4><ul>'+state.weaknesses.map(s=>'<li>'+s+'</li>').join('')+'</ul></div><div class="swot-box o-box"><h4>Opportunities ('+state.opportunities.length+')</h4><ul>'+state.opportunities.map(s=>'<li>'+s+'</li>').join('')+'</ul></div><div class="swot-box t-box"><h4>Threats ('+state.threats.length+')</h4><ul>'+state.threats.map(s=>'<li>'+s+'</li>').join('')+'</ul></div>';const sS=state.strengths.length+state.opportunities.length;const wS=state.weaknesses.length+state.threats.length;const ratio=sS/Math.max(sS+wS,1);const pct=Math.round(ratio*100);let cls=pct>=60?'high':pct>=40?'mid':'low';let col=pct>=60?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';document.getElementById('swot-summary').innerHTML='<strong>Balance: <span class="score '+cls+'">'+pct+'</span></strong><div class="meter"><div class="meter-fill" style="width:'+pct+'%;background:'+col+'"></div></div><p style="margin-top:8px">S+O: '+sS+' vs W+T: '+wS+'</p>';document.getElementById('swot-result').style.display='block';state.risks=[...state.weaknesses.map(w=>({name:w,type:'W',prob:3,impact:3})),...state.threats.map(t=>({name:t,type:'T',prob:3,impact:3}))]}
-function renderCriteria(){const el=document.getElementById('criteria-list');el.innerHTML=state.criteria.map((c,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:var(--bg);border-radius:8px"><span style="flex:1;font-size:.85em">'+c.name+'</span><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Weight</div><select onchange="state.criteria['+i+'].weight=+this.value" style="width:60px;padding:6px">'+[1,2,3,4,5].map(v=>'<option '+(v===c.weight?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Score</div><select onchange="state.criteria['+i+'].score=+this.value" style="width:60px;padding:6px">'+[0,1,2,3,4,5,6,7,8,9,10].map(v=>'<option '+(v===c.score?'selected':'')+'>'+v+'</option>').join('')+'</select></div><button class="btn btn-sm btn-outline" onclick="state.criteria.splice('+i+',1);renderCriteria()" style="color:var(--red);border-color:var(--red)">X</button></div>').join('')}
-function addCriterion(){const inp=document.getElementById('new-criterion');if(inp.value.trim()){state.criteria.push({name:inp.value.trim(),weight:3,score:0});inp.value='';renderCriteria()}}
-function calculateMatrix(){const mx=state.criteria.reduce((s,c)=>s+c.weight*10,0);const ac=state.criteria.reduce((s,c)=>s+c.weight*c.score,0);const pct=Math.round(ac/Math.max(mx,1)*100);let v=pct>=65?'GO':pct>=40?'CONDITIONAL':'NO-GO';document.getElementById('matrix-card').innerHTML='<h3>Matrix Result</h3><table class="matrix-table"><tr><th>Criterion</th><th>Weight</th><th>Score</th><th>Weighted</th></tr>'+state.criteria.map(c=>'<tr><td>'+c.name+'</td><td>'+c.weight+'</td><td>'+c.score+'/10</td><td><strong>'+c.weight*c.score+'</strong></td></tr>').join('')+'<tr style="background:rgba(99,102,241,.1)"><td><strong>Total</strong></td><td>'+state.criteria.reduce((s,c)=>s+c.weight,0)+'</td><td>-</td><td><strong>'+ac+'/'+mx+'</strong></td></tr></table><div class="result-card" style="margin-top:16px"><p>Weighted Score</p><div class="verdict '+(pct>=65?'go':pct>=40?'caution':'nogo')+'">'+pct+'% - '+v+'</div><div class="meter"><div class="meter-fill" style="width:'+pct+'%;background:'+(pct>=65?'var(--green)':pct>=40?'var(--yellow)':'var(--red)')+'"></div></div></div>';document.getElementById('matrix-result').style.display='block'}
-function renderRiskItems(){const el=document.getElementById('risk-items');if(!state.risks.length){el.innerHTML='<div class="empty-state">Run SWOT first.</div>';return}el.innerHTML=state.risks.map((r,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:10px;background:var(--bg);border-radius:8px"><span class="risk-tag '+(r.type==='T'?'risk-high':'risk-mid')+'">'+r.type+'</span><span style="flex:1;font-size:.85em">'+r.name+'</span><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Prob</div><select onchange="state.risks['+i+'].prob=+this.value" style="width:55px;padding:6px">'+[1,2,3,4,5].map(v=>'<option '+(v===r.prob?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div style="text-align:center"><div style="font-size:.7em;color:var(--muted)">Impact</div><select onchange="state.risks['+i+'].impact=+this.value" style="width:55px;padding:6px">'+[1,2,3,4,5].map(v=>'<option '+(v===r.impact?'selected':'')+'>'+v+'</option>').join('')+'</select></div></div>').join('')}
-function calculateRisk(){if(!state.risks.length)return;const scored=state.risks.map(r=>({...r,riskScore:r.prob*r.impact}));scored.sort((a,b)=>b.riskScore-a.riskScore);const avg=scored.reduce((s,r)=>s+r.riskScore,0)/scored.length;const mx=Math.max(...scored.map(r=>r.riskScore));document.getElementById('risk-profile').innerHTML='<table class="matrix-table"><tr><th>Risk</th><th>Type</th><th>Prob</th><th>Impact</th><th>Score</th><th>Grade</th></tr>'+scored.map(r=>{let g=r.riskScore>=16?'CRITICAL':r.riskScore>=9?'HIGH':r.riskScore>=4?'MEDIUM':'LOW';let c=r.riskScore>=16?'risk-high':r.riskScore>=9?'risk-mid':'risk-low';return'<tr><td>'+r.name+'</td><td>'+r.type+'</td><td>'+r.prob+'</td><td>'+r.impact+'</td><td><strong>'+r.riskScore+'</strong></td><td><span class="risk-tag '+c+'">'+g+'</span></td></tr>'}).join('')+'</table><div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:.85em"><p>Avg Risk: <strong>'+avg.toFixed(1)+'</strong>/25 | Max: <strong>'+mx+'</strong>/25</p></div>';const sb=(state.strengths.length+state.opportunities.length)/Math.max(state.strengths.length+state.opportunities.length+state.weaknesses.length+state.threats.length,1);const ms=state.criteria.reduce((s,c)=>s+c.weight*c.score,0)/Math.max(state.criteria.reduce((s,c)=>s+c.weight*10,0),1);const rf=1-(avg/25);const fs=Math.round((sb*.3+ms*.4+rf*.3)*100);let fc=fs>=65?'go':fs>=40?'caution':'nogo';let fl=fs>=65?'GO':fs>=40?'CONDITIONAL':'NO-GO';document.getElementById('final-verdict').innerHTML='<p style="font-size:.9em;color:var(--muted)">Final Decision Score</p><div class="verdict '+fc+'">'+fs+'</div><div class="meter"><div class="meter-fill" style="width:'+fs+'%;background:'+(fs>=65?'var(--green)':fs>=40?'var(--yellow)':'var(--red)')+'"></div></div><p style="margin-top:8px;font-size:1.1em;font-weight:600">'+fl+'</p><p style="margin-top:12px;font-size:.8em;color:var(--muted)">SWOT(30%):'+Math.round(sb*100)+' | Matrix(40%):'+Math.round(ms*100)+' | Risk(30%):'+Math.round(rf*100)+'</p><button class="btn btn-sm btn-outline" style="margin-top:16px" onclick="saveToHistory()">Save</button>
-    <button class="btn btn-sm btn-outline" style="margin-top:8px;border-color:var(--accent);color:var(--accent)" onclick="saveToNotion()">Notion Save</button>';document.getElementById('risk-result').style.display='block'}
-function saveToHistory(){const e={id:Date.now(),title:state.title,category:state.category,date:new Date().toISOString().split('T')[0],state:JSON.parse(JSON.stringify(state))};history.unshift(e);try{localStorage.setItem('df_history',JSON.stringify(history.slice(0,20)))}catch(x){}alert('Saved!')}
-function renderHistory(){const el=document.getElementById('history-list');if(!history.length){el.innerHTML='<div class="empty-state">No saved analyses yet.</div>';return}el.innerHTML=history.map(h=>'<div class="history-item" onclick="loadHistory('+h.id+')"><div class="title">'+h.title+'</div><div class="meta">'+h.date+' | '+h.category+'</div></div>').join('')}
-function saveToNotion(){
-  const sb=(state.strengths.length+state.opportunities.length)/Math.max(state.strengths.length+state.opportunities.length+state.weaknesses.length+state.threats.length,1);
-  const mx=state.criteria.reduce((s,c)=>s+c.weight*10,0);
-  const ac=state.criteria.reduce((s,c)=>s+c.weight*c.score,0);
-  const ms=ac/Math.max(mx,1);
-  const ar=state.risks.length?state.risks.reduce((s,r)=>s+r.prob*r.impact,0)/state.risks.length:0;
-  const rf=1-(ar/25);
-  const fs=Math.round((sb*0.3+ms*0.4+rf*0.3)*100);
-  const vd=fs>=65?'GO':fs>=40?'CONDITIONAL':'NO-GO';
-  const td=new Date().toISOString().split('T')[0];
-  const md='# Decision: '+state.title+'\n'+td+' | '+state.category+' | '+vd+' ('+fs+')\n\n## SWOT\n### Strengths\n'+state.strengths.map(s=>'- '+s).join('\n')+'\n### Weaknesses\n'+state.weaknesses.map(s=>'- '+s).join('\n')+'\n### Opportunities\n'+state.opportunities.map(s=>'- '+s).join('\n')+'\n### Threats\n'+state.threats.map(s=>'- '+s).join('\n')+'\n\nSWOT Balance: '+Math.round(sb*100)+'\n\n## Matrix\n'+state.criteria.map(c=>c.name+': W'+c.weight+' S'+c.score+' = '+(c.weight*c.score)).join('\n')+'\nTotal: '+ac+'/'+mx+' ('+Math.round(ms*100)+'%)\n\n## Risk\n'+state.risks.map(r=>{const rs=r.prob*r.impact;const g=rs>=16?'CRITICAL':rs>=9?'HIGH':rs>=4?'MEDIUM':'LOW';return'['+g+'] '+r.name+' P'+r.prob+'xI'+r.impact+'='+rs}).join('\n')+'\nAvg: '+ar.toFixed(1)+'/25\n\n## VERDICT: '+fs+' - '+vd+'\nSWOT(30%):'+Math.round(sb*100)+' Matrix(40%):'+Math.round(ms*100)+' Risk(30%):'+Math.round(rf*100);
-  const jd=JSON.stringify({title:state.title,category:state.category,deadline:state.deadline,date:td,finalScore:fs,verdict:vd,swot:{s:state.strengths,w:state.weaknesses,o:state.opportunities,t:state.threats},matrix:{criteria:state.criteria,score:Math.round(ms*100)},risk:{items:state.risks,avg:+ar.toFixed(1)}});
-  localStorage.setItem('df_notion_export',jd);
-  navigator.clipboard.writeText(md).then(()=>{alert('Notion compatible markdown copied! Paste in Notion (Ctrl+V). Or tell Cowork: Save to Notion.')}).catch(()=>{const ta=document.createElement('textarea');ta.value=md;ta.style.cssText='position:fixed;top:10%;left:10%;width:80%;height:80%;z-index:9999;background:#1a1a2e;color:#e2e8f0;padding:16px;border-radius:8px;font-size:12px';document.body.appendChild(ta);ta.select();document.execCommand('copy');setTimeout(()=>ta.remove(),5000);alert('Copied! Paste in Notion.')})
+// ══════ STARFIELD ══════
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
-function loadHistory(id){const h=history.find(x=>x.id==id);if(!h)return;state=JSON.parse(JSON.stringify(h.state));document.getElementById('decision-title').value=state.title;document.getElementById('deadline').value=state.deadline||'';document.getElementById('strengths').value=state.strengths.join('\n');document.getElementById('weaknesses').value=state.weaknesses.join('\n');document.getElementById('opportunities').value=state.opportunities.join('\n');document.getElementById('threats').value=state.threats.join('\n');showTab(0);generateSWOT()}
+function initStars() {
+  stars = Array.from({length: 160}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.2,
+    o: Math.random() * 0.6 + 0.1,
+    s: Math.random() * 0.15 + 0.05,
+    d: Math.random() > 0.5 ? 1 : -1
+  }));
+}
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.o += s.s * s.d * 0.01;
+    if (s.o > 0.7 || s.o < 0.05) s.d *= -1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(180,210,255,${s.o})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+resizeCanvas(); initStars(); drawStars();
+window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+
+// ══════ CLOCK ══════
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  document.getElementById('dateStr').textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${days[now.getDay()]}`;
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ══════ TRIAGE ══════
+let triageAnswers = [];
+const triageLogic = [
+  // [yesNext, noResult]
+  [1, {verdict:'DROP / DELEGATE', sub:'3대 채널 비직결 → 즉시 위임하거나 폐기 권고', color:'var(--drop)', type:'drop'}],
+  [2, {verdict:'SCHEDULE', sub:'긴급하지 않음 → 주간 계획에 블록으로 예약', color:'var(--schedule)', type:'schedule'}],
+  [{verdict:'DELEGATE', sub:'자동화/위임 가능 → n8n 또는 외주로 처리', color:'var(--delegate)', type:'delegate'},
+   {verdict:'GO NOW', sub:'즉시 실행 — 핵심 채널 직결 + 긴급 + 직접 실행 필수', color:'var(--go)', type:'go'}]
+];
+function triage(q, yes) {
+  const logic = triageLogic[q];
+  if (yes) {
+    if (typeof logic[0] === 'number') {
+      document.getElementById(`tq${q}`).classList.remove('active');
+      document.getElementById(`tq${logic[0]}`).classList.add('active');
+    } else showTriageResult(logic[0]);
+  } else {
+    showTriageResult(logic[1]);
+  }
+}
+function showTriageResult(r) {
+  document.querySelectorAll('.triage-q').forEach(q => q.classList.remove('active'));
+  const res = document.getElementById('triageResult');
+  res.classList.add('show');
+  res.style.borderColor = r.color;
+  document.getElementById('tvBig').style.color = r.color;
+  document.getElementById('tvBig').textContent = r.verdict;
+  document.getElementById('tvSub').textContent = r.sub;
+}
+function resetTriage() {
+  document.getElementById('triageResult').classList.remove('show');
+  document.querySelectorAll('.triage-q').forEach(q => q.classList.remove('active'));
+  document.getElementById('tq0').classList.add('active');
+}
+
+// ══════ SCORE RING ══════
+function updateRing() {
+  const vals = [1,2,3,4,5].map(i => parseInt(document.getElementById(`rs${i}`).value));
+  const weights = [3, 2.5, 2, 1.5, 1];
+  const colors = ['var(--go)', 'var(--cyan)', 'var(--amber)', 'var(--purple)', 'var(--drop)'];
+  vals.forEach((v, i) => {
+    document.getElementById(`rv${i+1}`).textContent = v;
+    document.getElementById(`rv${i+1}`).style.color = colors[i];
+  });
+  const score = Math.round(vals.reduce((sum, v, i) => sum + v * weights[i], 0));
+  document.getElementById('ringNum').textContent = score;
+
+  const circ = 2 * Math.PI * 70;
+  const offset = circ * (1 - score / 100);
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDasharray = circ;
+  ring.style.strokeDashoffset = offset;
+
+  let color, verdict;
+  if (score >= 80) {
+    color = 'var(--go)'; verdict = '✅ 즉시 실행 GO';
+  } else if (score >= 60) {
+    color = 'var(--amber)'; verdict = '⚠ 조건부 실행';
+  } else {
+    color = 'var(--drop)'; verdict = '🚫 재설계 권고';
+  }
+  ring.style.stroke = color;
+  document.getElementById('ringNum').style.fill = color;
+  document.getElementById('ringVerdict').style.color = color;
+  document.getElementById('ringVerdict').textContent = verdict;
+  return score;
+}
+updateRing();
+
+// ══════ DECISION LOG ══════
+let logEntries = [];
+function addLog() {
+  const input = document.getElementById('logInput');
+  const type = document.getElementById('logType').value;
+  const text = input.value.trim();
+  if (!text) return;
+  const score = updateRing();
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  logEntries.unshift({ time, text, type, score });
+  input.value = '';
+  renderLog();
+}
+function renderLog() {
+  const body = document.getElementById('logBody');
+  document.getElementById('logCount').textContent = `${logEntries.length} ENTRIES`;
+  if (!logEntries.length) {
+    body.innerHTML = '<tr><td colspan="4" class="log-empty">// 아직 기록된 의사결정이 없습니다</td></tr>';
+    return;
+  }
+  const typeLabels = { go:'GO', delegate:'DELEGATE', schedule:'SCHEDULE', drop:'DROP' };
+  body.innerHTML = logEntries.slice(0, 8).map(e => `
+    <tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim)">${e.time}</td>
+      <td style="color:var(--text-bright)">${e.text}</td>
+      <td><span class="verdict-chip vc-${e.type}">${typeLabels[e.type]}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan)">${e.score}</td>
+    </tr>
+  `).join('');
+}
+
+// ══════ AI SWOT GENERATOR ══════
+async function generateSWOT() {
+  const input = document.getElementById('swotInput').value.trim();
+  if (!input) return;
+  const btn = document.getElementById('swotBtn');
+  const loading = document.getElementById('swotLoading');
+  const grid = document.getElementById('swotGrid');
+  btn.disabled = true;
+  loading.classList.add('show');
+  grid.classList.remove('show');
+
+  const systemPrompt = `당신은 정동수(CEO, 서울대 공대 박사, 대치동 수학/KOI 강사, AI 기업 스타게이트 설립자)의 전략 의사결정 보좌관입니다.
+주어진 의사결정 주제에 대해 SWOT 분석을 JSON으로만 출력하세요. 다른 텍스트 없이 순수 JSON만 출력합니다.
+형식: {"S":["강점1","강점2","강점3"],"W":["약점1","약점2","약점3"],"O":["기회1","기회2","기회3"],"T":["위협1","위협2","위협3"]}
+각 항목 3개씩. 정동수의 실제 상황(대치동 과외, Kmong 디지털 제품, Airbnb/WeHome 단기임대, 박사 논문, AI CEO)을 반영해서 분석하세요. 매출 전환력과 실행 가능성 관점에서 구체적이고 실용적으로 작성하세요.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `의사결정 주제: ${input}` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const swot = JSON.parse(clean);
+    ['S','W','O','T'].forEach(k => {
+      document.getElementById(`sq${k}`).innerHTML = (swot[k]||[]).map(i => `<li>${i}</li>`).join('');
+    });
+    grid.classList.add('show');
+  } catch(e) {
+    ['S','W','O','T'].forEach(k => {
+      document.getElementById(`sq${k}`).innerHTML = '<li style="color:var(--drop)">분석 오류 — 다시 시도하세요</li>';
+    });
+    grid.classList.add('show');
+  } finally {
+    loading.classList.remove('show');
+    btn.disabled = false;
+  }
+}
 </script>
 </body>
 </html>
