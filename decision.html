@@ -987,7 +987,22 @@ input[type=range]::-webkit-slider-thumb {
   </div>
 
   <!-- Footer -->
-  <div class="footer reveal" style="animation-delay:0.85s">
+  
+    <!-- NOTION SYNC -->
+    <div class="sec-head reveal" style="animation-delay:0.8s">
+      <div class="tag">08 · NOTION SYNC</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border2);padding:24px;text-align:center;animation-delay:0.85s" class="reveal">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-bottom:16px">
+        // 현재 분석 데이터를 Notion Decision Framework 허브에 자동 저장합니다
+      </div>
+      <button onclick="saveToNotion()" style="background:transparent;border:1px solid var(--purple);color:var(--purple);padding:14px 40px;cursor:pointer;font-family:'Orbitron',monospace;font-size:12px;letter-spacing:3px;font-weight:700;transition:all 0.2s" onmouseover="this.style.background='rgba(192,132,252,0.1)';this.style.boxShadow='0 0 20px rgba(192,132,252,0.3)'" onmouseout="this.style.background='transparent';this.style.boxShadow='none'">
+        SAVE TO NOTION
+      </button>
+      <div id="notionStatus" style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:12px;letter-spacing:1px;min-height:20px"></div>
+    </div>
+
+    <div class="footer reveal" style="animation-delay:0.85s">
     <div class="footer-left">STARGATE CORP · 주식회사 별의문 · EST. 2025.08.15</div>
     <div class="footer-right">DAECHI-DONG, SEOUL · DECISION OS v3.0 · 80/20 PARETO ENGINE</div>
   </div>
@@ -1186,6 +1201,42 @@ async function generateSWOT() {
     btn.disabled = false;
   }
 }
-</script>
+
+    // NOTION AUTO-SAVE
+    async function saveToNotion() {
+      const status = document.getElementById('notionStatus');
+      status.style.color = 'var(--cyan)';
+      status.textContent = 'SAVING TO NOTION...';
+      const swotS = [...document.querySelectorAll('#sqS li')].map(l => l.textContent);
+      const swotW = [...document.querySelectorAll('#sqW li')].map(l => l.textContent);
+      const swotO = [...document.querySelectorAll('#sqO li')].map(l => l.textContent);
+      const swotT = [...document.querySelectorAll('#sqT li')].map(l => l.textContent);
+      const vals = [1,2,3,4,5].map(i => parseInt(document.getElementById('rs'+i).value));
+      const weights = [0.30, 0.25, 0.20, 0.15, 0.10];
+      const names = ['Revenue','Execution','TimeEff','Pareto','AssetBuild'];
+      const criteria = vals.map((v,i) => ({name:names[i], weight:weights[i]*100, score:v}));
+      const totalScore = Math.round(vals.reduce((s,v,i) => s + v * [3,2.5,2,1.5,1][i], 0));
+      const riskItems = logEntries.slice(0,5).map(e => ({name:e.text, prob:e.type==='go'?2:e.type==='drop'?4:3, impact:Math.round(e.score/20)}));
+      const avgRisk = riskItems.length ? riskItems.reduce((s,r)=>s+r.prob*r.impact,0)/riskItems.length : 0;
+      const swotInput = document.getElementById('swotInput').value || 'General Analysis';
+      const verdict = totalScore >= 80 ? 'GO' : totalScore >= 60 ? 'CONDITIONAL' : 'NO-GO';
+      const today = new Date().toISOString().split('T')[0];
+      const payload = {title:swotInput, category:'Decision Framework v3.0', deadline:'', date:today, finalScore:totalScore, verdict:verdict, swot:{s:swotS,w:swotW,o:swotO,t:swotT}, matrix:{criteria:criteria,score:totalScore}, risk:{items:riskItems,avg:+avgRisk.toFixed(1)}};
+      try {
+        const res = await fetch('https://inftexpcnfinglwlrvsj.supabase.co/functions/v1/notion-proxy', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+        const data = await res.json();
+        if (data.success) {
+          status.style.color = 'var(--go)';
+          status.innerHTML = 'SAVED — <a href="' + data.url + '" target="_blank" style="color:var(--cyan);text-decoration:underline">Open in Notion</a>';
+        } else {
+          status.style.color = 'var(--drop)';
+          status.textContent = 'ERROR: ' + (data.error || 'Unknown');
+        }
+      } catch(err) {
+        status.style.color = 'var(--drop)';
+        status.textContent = 'NETWORK ERROR: ' + err.message;
+      }
+    }
+    </script>
 </body>
 </html>
