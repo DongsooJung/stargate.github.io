@@ -1,3 +1,12 @@
+# ⚠️ Legacy repository
+
+> This repository is no longer a production source. Do not make new production changes here.  
+> Current corporate portal: [DongsooJung/stargate-main](https://github.com/DongsooJung/stargate-main) · [portal.stargateedu.co.kr](https://portal.stargateedu.co.kr/)
+
+The content below is retained for historical reference.
+
+---
+
 # 🌌 Stargate Portal — stargate11.com
 
 > **주식회사 별의문 (Stargate Corporation) 공식 웹사이트**
